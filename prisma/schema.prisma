@@ -1,0 +1,127 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  itineraries Itinerary[]
+  
+  @@map("users")
+}
+
+model Location {
+  id          String   @id @default(cuid())
+  name        String
+  state       String
+  description String?
+  imageUrl    String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  attractions Attraction[]
+  itineraries Itinerary[]
+  
+  @@map("locations")
+}
+
+model Attraction {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  imageUrl    String?
+  category    String   // temple, museum, adventure, nature, etc.
+  rating      Float?
+  duration    Int?     // in hours
+  price       Float?   // entry fee
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  locationId  String
+  location    Location @relation(fields: [locationId], references: [id])
+  activities  Activity[]
+  itineraryItems ItineraryItem[]
+  
+  @@map("attractions")
+}
+
+model Activity {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  duration    Int      // in minutes
+  price       Float?
+  category    String   // adventure, cultural, food, shopping, etc.
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  attractionId String
+  attraction   Attraction @relation(fields: [attractionId], references: [id])
+  itineraryItems ItineraryItem[]
+  
+  @@map("activities")
+}
+
+model Itinerary {
+  id          String   @id @default(cuid())
+  title       String
+  startDate   DateTime
+  endDate     DateTime
+  totalDays   Int
+  budget      Float?
+  preferences String?  // JSON string of user preferences
+  status      String   @default("draft") // draft, confirmed, completed
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  locationId  String
+  location    Location @relation(fields: [locationId], references: [id])
+  items       ItineraryItem[]
+  
+  @@map("itineraries")
+}
+
+model ItineraryItem {
+  id          String   @id @default(cuid())
+  day         Int
+  startTime   DateTime
+  endTime     DateTime
+  title       String
+  description String?
+  type        String   // attraction, activity, travel, meal, rest
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  itineraryId   String
+  itinerary     Itinerary  @relation(fields: [itineraryId], references: [id])
+  attractionId  String?
+  attraction    Attraction? @relation(fields: [attractionId], references: [id])
+  activityId    String?
+  activity      Activity?   @relation(fields: [activityId], references: [id])
+  
+  @@map("itinerary_items")
+}
