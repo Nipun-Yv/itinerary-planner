@@ -1,14 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
 
-interface AuthFormsProps {
-  onSuccess?: () => void
-}
-
-export default function AuthForms({ onSuccess }: AuthFormsProps) {
+export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -20,7 +16,7 @@ export default function AuthForms({ onSuccess }: AuthFormsProps) {
     password: '',
   })
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
     setError('')
@@ -43,10 +39,7 @@ export default function AuthForms({ onSuccess }: AuthFormsProps) {
         throw new Error(data.error || 'Something went wrong')
       }
 
-      // Success - redirect to itinerary page
-      onSuccess?.()
-router.push('/dashboard')
-      
+      router.push('/dashboard')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
     } finally {
@@ -54,113 +47,78 @@ router.push('/dashboard')
     }
   }
 
-  const handleLogout = async () => {
-    try {
-      await fetch('/api/auth', { method: 'DELETE' })
-      router.push('/')
-    } catch (error) {
-      console.error('Logout error:', error)
-    }
-  }
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            {isLogin ? 'Welcome Back' : 'Create Account'}
-          </h1>
-          <p className="text-gray-600">
-            {isLogin 
-              ? 'Sign in to plan your next adventure' 
-              : 'Join us to create amazing itineraries'
-            }
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
+    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-orange-100 text-foreground p-4">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+        <h2 className="text-3xl font-semibold text-center text-orange-500 mb-2">
+          {isLogin ? 'Welcome Back' : 'Create Account'}
+        </h2>
+        <p className="text-center text-gray-600 mb-6">
+          {isLogin ? 'Sign in to plan your next adventure' : 'Join us to create amazing itineraries'}
+        </p>
+        <form onSubmit={handleSubmit} className="space-y-4">
           {!isLogin && (
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name
-              </label>
+              <label className="block text-sm font-medium">Full Name</label>
               <input
-                id="name"
                 type="text"
                 required={!isLogin}
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
                 placeholder="Enter your full name"
+                className="mt-1 w-full px-4 py-2 border rounded-md bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
             </div>
           )}
-
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-              Email Address
-            </label>
+            <label className="block text-sm font-medium">Email</label>
             <input
-              id="email"
               type="email"
               required
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
               placeholder="Enter your email"
+              className="mt-1 w-full px-4 py-2 border rounded-md bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
           </div>
-
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-              Password
-            </label>
+            <label className="block text-sm font-medium">Password</label>
             <input
-              id="password"
               type="password"
               required
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
               placeholder="Enter your password"
+              className="mt-1 w-full px-4 py-2 border rounded-md bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-orange-400"
               minLength={6}
             />
           </div>
-
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
               <p className="text-sm text-red-600">{error}</p>
             </div>
           )}
-
-          <Button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 text-base font-medium"
-          >
-            {loading 
-              ? (isLogin ? 'Signing In...' : 'Creating Account...') 
-              : (isLogin ? 'Sign In' : 'Create Account')
-            }
+          <Button type="submit" disabled={loading} className="w-full py-2 text-base font-semibold">
+            {loading ? (isLogin ? 'Signing In...' : 'Creating Account...') : (isLogin ? 'Sign In' : 'Create Account')}
           </Button>
         </form>
-
         <div className="mt-6 text-center">
           <p className="text-gray-600">
             {isLogin ? "Don't have an account? " : "Already have an account? "}
             <button
+              type="button"
               onClick={() => {
                 setIsLogin(!isLogin)
                 setError('')
                 setFormData({ name: '', email: '', password: '' })
               }}
-              className="text-blue-600 hover:text-blue-700 font-medium hover:underline"
+              className="text-orange-600 hover:text-orange-700 font-medium hover:underline"
             >
               {isLogin ? 'Sign Up' : 'Sign In'}
             </button>
           </p>
         </div>
       </div>
-    </div>
+    </main>
   )
 }
