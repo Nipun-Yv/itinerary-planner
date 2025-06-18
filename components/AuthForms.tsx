@@ -45,7 +45,7 @@ export default function AuthForms({ onSuccess }: AuthFormsProps) {
 
       // Success - redirect to itinerary page
       onSuccess?.()
-      router.push('/itinerary')
+router.push('/dashboard')
       
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
