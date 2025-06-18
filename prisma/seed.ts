@@ -138,6 +138,7 @@ async function main() {
         price: 500,
         category: 'Cultural',
         attractionId: delhiAttractions[0].id,
+        isActive: true,
       },
     }),
     prisma.activity.create({
@@ -148,6 +149,7 @@ async function main() {
         price: 1000,
         category: 'Photography',
         attractionId: delhiAttractions[0].id,
+        isActive: true,
       },
     }),
     // Amber Fort activities
@@ -159,6 +161,7 @@ async function main() {
         price: 1100,
         category: 'Adventure',
         attractionId: jaipurAttractions[0].id,
+        isActive: true,
       },
     }),
     prisma.activity.create({
@@ -169,6 +172,7 @@ async function main() {
         price: 200,
         category: 'Entertainment',
         attractionId: jaipurAttractions[0].id,
+        isActive: true,
       },
     }),
   ])
