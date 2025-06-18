@@ -93,14 +93,21 @@ export default function ActivitiesPage({ params }) {
     return categories.sort();
   };
 
-  const proceedToItinerary = () => {
+  // Updated function to redirect to /ai route
+  const proceedToAI = () => {
     if (selectedActivities.length === 0) {
       alert('Please select at least one activity');
       return;
     }
     
     const activityIds = selectedActivities.map(a => a.id).join(',');
-    router.push(`/locations/${params.locationId}/itinerary?activities=${activityIds}&attractions=${attractionIds.join(',')}`);
+    const queryParams = new URLSearchParams({
+      activities: activityIds,
+      attractions: attractionIds.join(','),
+      location: params.locationId
+    });
+    
+    router.push(`/ai?${queryParams.toString()}`);
   };
 
   if (loading) {
@@ -194,10 +201,10 @@ export default function ActivitiesPage({ params }) {
                 {selectedActivities.length} activit{selectedActivities.length !== 1 ? 'ies' : 'y'} selected
               </span>
               <button
-                onClick={proceedToItinerary}
+                onClick={proceedToAI}
                 className="bg-white text-orange-500 px-6 py-2 rounded-lg font-semibold hover:bg-orange-50 transition-colors"
               >
-                Create Itinerary →
+                Generate AI Itinerary →
               </button>
             </div>
           </div>
@@ -293,10 +300,10 @@ export default function ActivitiesPage({ params }) {
                 </p>
               </div>
               <button
-                onClick={proceedToItinerary}
+                onClick={proceedToAI}
                 className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg font-semibold transition-colors shadow-sm"
               >
-                Create Itinerary
+                Generate AI Itinerary
               </button>
             </div>
           </div>

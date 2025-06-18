@@ -13,7 +13,6 @@ const ItineraryPage = async () => {
 
   return (
     <div className="w-full h-screen bg-gray-50">
-      {/* Header */}
       <div className="bg-white shadow-sm border-b px-6 py-4 flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Your Itinerary</h1>
@@ -27,7 +26,6 @@ const ItineraryPage = async () => {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="h-full p-6">
         <TripCalendar />
       </div>

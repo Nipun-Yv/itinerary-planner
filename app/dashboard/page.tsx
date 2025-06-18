@@ -15,26 +15,40 @@ export default async function Dashboard() {
     month: 'long',
     day: 'numeric'
   });
+  const getGreeting = () => {
+  const hour = new Date().getHours();
+  
+  if (hour < 12) {
+    return "Good morning! 🌅";
+  } else if (hour < 17) {
+    return "Good afternoon! ☀️";
+  } else if (hour < 21) {
+    return "Good evening! 🌆";
+  } else {
+    return "Good night! 🌙";
+  }
+};
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-rose-50 p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header Section */}
-        <header className="mb-8">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-            <div>
-              <h1 className="text-5xl font-bold text-slate-800 mb-2">
-                Good morning! 👋
-              </h1>
-              <p className="text-slate-600 text-lg">{currentDate}</p>
-            </div>
-            <div className="mt-4 md:mt-0">
-              <div className="bg-white/70 backdrop-blur-lg rounded-2xl px-4 py-2 border border-orange-200/50">
-                <span className="text-slate-700 font-medium">{currentTime}</span>
-              </div>
+        
+      <header className="mb-8">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="text-5xl font-bold text-slate-800 mb-2">
+              {getGreeting()}
+            </h1>
+            <p className="text-slate-600 text-lg">{currentDate}</p>
+          </div>
+          <div className="mt-4 md:mt-0">
+            <div className="bg-white/70 backdrop-blur-lg rounded-2xl px-4 py-2 border border-orange-200/50">
+              <span className="text-slate-700 font-medium">{currentTime}</span>
             </div>
           </div>
-        </header>
+        </div>
+      </header>
 
 
 
