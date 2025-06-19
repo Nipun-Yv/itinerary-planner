@@ -8,7 +8,7 @@
   --orange-400:#d8614e;
   --orange-300:#ff7439;
   --orange-200:rgb(255, 153, 0);
-  --orange-100:#ffa600;
+  --orange-100:#ffb700;
   --radius:0.625rem;
   --background:oklch(1 0 0);
   --foreground:oklch(0.141 0.005 285.823);
@@ -147,7 +147,7 @@
 .rbc-allday-cell{ 
   /* jo days labelled hai unke niche wala colored block
     */
-  background-color: var(--color-orange-200);
+background: linear-gradient(to bottom right,var(--color-orange-200),var(--color-orange-200),var(--color-orange-300),var(--color-orange-500));
 }
 
 .rbc-header {
@@ -229,15 +229,13 @@ background: linear-gradient(to bottom right,var(--color-orange-200),var(--color-
 }
 
 .rbc-time-slot .rbc-label{
-  color:white;
   padding:15px;
   font-weight: 200;
 }
 
 
 body > div > div > div > div.rbc-time-view > div.rbc-time-content > div.rbc-time-gutter.rbc-time-column{
-  background-image: linear-gradient(to bottom,orange,var(--color-orange-500),var(--color-orange-500)) !important;
-  color:white;
+  color:grey !important;
 }
 
 
@@ -248,6 +246,9 @@ body > div > div > div > div.rbc-time-view > div.rbc-time-content > div.rbc-time
   padding: 50px;
 }
 
+body > div > div > div.rbc-calendar > div.rbc-time-view > div.rbc-time-content  div.rbc-events-container{
+  margin-right: 0!important ;
+}
 .rbc-event-label{
   width:100%;
   word-spacing: 0%;
@@ -257,3 +258,10 @@ body > div > div > div > div.rbc-time-view > div.rbc-time-content > div{
   border-left:0.75px solid orange!important;
   border-right:none !important;
 }
+
+ .rbc-event-continues-later .rbc-event-label{
+  font-weight: 200;
+ }
+ .rbc-event-continues-later .rbc-event-content{
+  max-height: min-content !important;
+ }
