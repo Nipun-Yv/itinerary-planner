@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import TripCalendar from "@/components/TripCalendar"
 import { Button } from '@/components/ui/button'
 import LogoutButton from '@/components/LogoutButton'
+import Link from "next/link";
 
 const ItineraryPage = async () => {
   const user = await getCurrentUser()
@@ -19,9 +20,11 @@ const ItineraryPage = async () => {
           <p className="text-gray-600">Welcome back, {user.name}!</p>
         </div>
         <div className="flex items-center gap-4">
+          <Link href="/plan">
           <Button variant="outline" size="sm">
             New Itinerary
           </Button>
+          </Link>
           <LogoutButton />
         </div>
       </div>
