@@ -1,19 +1,20 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import axios from "axios";
 
-export default function ActivitiesPage({ params}:{params:any}) {
+export default function ActivitiesPage({ params }: { params: any }) {
   const [activities, setActivities] = useState([]);
   const [attractions, setAttractions] = useState([]);
   const [selectedActivities, setSelectedActivities] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('all');
-  
+  const [activeTab, setActiveTab] = useState("all");
+
   const router = useRouter();
   const searchParams = useSearchParams();
-  const attractionIds = searchParams.get('attractions')?.split(',') || [];
+  const attractionIds = searchParams.get("attractions")?.split(",") || [];
 
   useEffect(() => {
     if (attractionIds.length > 0) {
@@ -36,24 +37,24 @@ export default function ActivitiesPage({ params}:{params:any}) {
         attractionIds.map(async (id) => {
           const response = await fetch(`/api/attractions/${id}/activities`);
           const data = await response.json();
-          return data.map(activity => ({ ...activity, attractionId: id }));
+          return data.map((activity) => ({ ...activity, attractionId: id }));
         })
       );
 
       setAttractions(attractionsData);
       setActivities(activitiesData.flat());
     } catch (error) {
-      console.error('Failed to fetch data:', error);
+      console.error("Failed to fetch data:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const toggleActivity = (activity) => {
-    setSelectedActivities(prev => {
-      const isSelected = prev.find(a => a.id === activity.id);
+    setSelectedActivities((prev) => {
+      const isSelected = prev.find((a) => a.id === activity.id);
       if (isSelected) {
-        return prev.filter(a => a.id !== activity.id);
+        return prev.filter((a) => a.id !== activity.id);
       } else {
         return [...prev, activity];
       }
@@ -62,18 +63,18 @@ export default function ActivitiesPage({ params}:{params:any}) {
 
   const getActivityIcon = (category) => {
     const icons = {
-      adventure: '🏔️',
-      cultural: '🎭',
-      food: '🍽️',
-      shopping: '🛍️',
-      entertainment: '🎡',
-      spiritual: '🙏',
-      photography: '📸',
-      educational: '📚',
-      relaxation: '🧘',
-      sports: '⚽'
+      adventure: "🏔️",
+      cultural: "🎭",
+      food: "🍽️",
+      shopping: "🛍️",
+      entertainment: "🎡",
+      spiritual: "🙏",
+      photography: "📸",
+      educational: "📚",
+      relaxation: "🧘",
+      sports: "⚽",
     };
-    return icons[category.toLowerCase()] || '🎯';
+    return icons[category.toLowerCase()] || "🎯";
   };
 
   const formatDuration = (minutes) => {
@@ -84,30 +85,46 @@ export default function ActivitiesPage({ params}:{params:any}) {
   };
 
   const getFilteredActivities = () => {
-    if (activeTab === 'all') return activities;
-    return activities.filter(activity => activity.category.toLowerCase() === activeTab);
+    if (activeTab === "all") return activities;
+    return activities.filter(
+      (activity) => activity.category.toLowerCase() === activeTab
+    );
   };
 
   const getUniqueCategories = () => {
-    const categories = [...new Set(activities.map(a => a.category.toLowerCase()))];
+    const categories = [
+      ...new Set(activities.map((a) => a.category.toLowerCase())),
+    ];
     return categories.sort();
   };
 
   // Updated function to redirect to /ai route
-  const proceedToAI = () => {
-    if (selectedActivities.length === 0) {
-      alert('Please select at least one activity');
-      return;
+  const proceedToAI = async () => {
+    try {
+      if (selectedActivities.length === 0) {
+        alert("Please select at least one activity");
+        return;
+      }
+
+      console.log(selectedActivities);
+
+      const activityIds = selectedActivities.map((a) => a.id);
+
+      const springApiBaseUrl = process.env.NEXT_PUBLIC_SPRING_API_URL;
+      const { data: user } = await axios.get("/api/user");
+      if (!user) {
+        router.push("/auth");
+        return;
+      }
+
+      await axios.post(`${springApiBaseUrl}/activities`, {
+        selectedActivities: activityIds,
+        userId: user.id,
+      });
+      router.push("/itinerary")
+    } catch (err: any) {
+      console.error(err.message)
     }
-    
-    const activityIds = selectedActivities.map(a => a.id).join(',');
-    const queryParams = new URLSearchParams({
-      activities: activityIds,
-      attractions: attractionIds.join(','),
-      location: params.locationId
-    });
-    
-    router.push(`/ai?${queryParams.toString()}`);
   };
 
   if (loading) {
@@ -128,10 +145,14 @@ export default function ActivitiesPage({ params}:{params:any}) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Available Activities</h1>
-              <p className="text-orange-600 mt-1">Choose activities for your selected attractions</p>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Available Activities
+              </h1>
+              <p className="text-orange-600 mt-1">
+                Choose activities for your selected attractions
+              </p>
             </div>
-            <Link 
+            <Link
               href={`/locations/${params.locationId}/attractions`}
               className="text-orange-600 hover:text-orange-700 font-medium"
             >
@@ -144,10 +165,12 @@ export default function ActivitiesPage({ params}:{params:any}) {
       {/* Selected Attractions Header */}
       <div className="bg-orange-100 border-b border-orange-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <h2 className="text-lg font-semibold text-orange-800 mb-2">Selected Attractions:</h2>
+          <h2 className="text-lg font-semibold text-orange-800 mb-2">
+            Selected Attractions:
+          </h2>
           <div className="flex flex-wrap gap-2">
             {attractions.map((attraction) => (
-              <span 
+              <span
                 key={attraction.id}
                 className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-orange-200 text-orange-800"
               >
@@ -163,25 +186,27 @@ export default function ActivitiesPage({ params}:{params:any}) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex space-x-8 overflow-x-auto">
             <button
-              onClick={() => setActiveTab('all')}
+              onClick={() => setActiveTab("all")}
               className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
-                activeTab === 'all'
-                  ? 'border-orange-500 text-orange-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                activeTab === "all"
+                  ? "border-orange-500 text-orange-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               }`}
             >
               All Activities ({activities.length})
             </button>
             {getUniqueCategories().map((category) => {
-              const count = activities.filter(a => a.category.toLowerCase() === category).length;
+              const count = activities.filter(
+                (a) => a.category.toLowerCase() === category
+              ).length;
               return (
                 <button
                   key={category}
                   onClick={() => setActiveTab(category)}
                   className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap capitalize ${
                     activeTab === category
-                      ? 'border-orange-500 text-orange-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? "border-orange-500 text-orange-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                   }`}
                 >
                   {getActivityIcon(category)} {category} ({count})
@@ -198,7 +223,8 @@ export default function ActivitiesPage({ params}:{params:any}) {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between">
               <span className="font-medium">
-                {selectedActivities.length} activit{selectedActivities.length !== 1 ? 'ies' : 'y'} selected
+                {selectedActivities.length} activit
+                {selectedActivities.length !== 1 ? "ies" : "y"} selected
               </span>
               <button
                 onClick={proceedToAI}
@@ -216,23 +242,31 @@ export default function ActivitiesPage({ params}:{params:any}) {
         {getFilteredActivities().length === 0 ? (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🎯</div>
-            <h2 className="text-2xl font-semibold text-gray-700 mb-2">No activities found</h2>
-            <p className="text-gray-500">Try selecting different attractions or check back later!</p>
+            <h2 className="text-2xl font-semibold text-gray-700 mb-2">
+              No activities found
+            </h2>
+            <p className="text-gray-500">
+              Try selecting different attractions or check back later!
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {getFilteredActivities().map((activity) => {
-              const isSelected = selectedActivities.find(a => a.id === activity.id);
-              const attraction = attractions.find(a => a.id === activity.attractionId);
-              
+              const isSelected = selectedActivities.find(
+                (a) => a.id === activity.id
+              );
+              const attraction = attractions.find(
+                (a) => a.id === activity.attractionId
+              );
+
               return (
                 <div
                   key={activity.id}
                   onClick={() => toggleActivity(activity)}
                   className={`cursor-pointer rounded-xl shadow-sm border-2 transition-all duration-200 hover:shadow-lg hover:-translate-y-1 ${
-                    isSelected 
-                      ? 'border-orange-500 bg-orange-50 shadow-orange-100' 
-                      : 'border-gray-200 bg-white hover:border-orange-300'
+                    isSelected
+                      ? "border-orange-500 bg-orange-50 shadow-orange-100"
+                      : "border-gray-200 bg-white hover:border-orange-300"
                   }`}
                 >
                   {/* Header */}
@@ -246,14 +280,18 @@ export default function ActivitiesPage({ params}:{params:any}) {
                           📍 {attraction?.name}
                         </p>
                       </div>
-                      
+
                       {/* Selection Indicator */}
-                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ml-3 flex-shrink-0 ${
-                        isSelected 
-                          ? 'bg-orange-500 border-orange-500' 
-                          : 'bg-white border-gray-300'
-                      }`}>
-                        {isSelected && <span className="text-white text-sm">✓</span>}
+                      <div
+                        className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ml-3 flex-shrink-0 ${
+                          isSelected
+                            ? "bg-orange-500 border-orange-500"
+                            : "bg-white border-gray-300"
+                        }`}
+                      >
+                        {isSelected && (
+                          <span className="text-white text-sm">✓</span>
+                        )}
                       </div>
                     </div>
 
@@ -270,12 +308,10 @@ export default function ActivitiesPage({ params}:{params:any}) {
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
                         {getActivityIcon(activity.category)} {activity.category}
                       </span>
-                      
+
                       <div className="flex items-center space-x-3 text-sm text-gray-500">
                         <span>⏱️ {formatDuration(activity.duration)}</span>
-                        {activity.price && (
-                          <span>💰 ₹{activity.price}</span>
-                        )}
+                        {activity.price && <span>💰 ₹{activity.price}</span>}
                       </div>
                     </div>
                   </div>
@@ -293,10 +329,14 @@ export default function ActivitiesPage({ params}:{params:any}) {
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-medium text-gray-900">
-                  {selectedActivities.length} activit{selectedActivities.length !== 1 ? 'ies' : 'y'} selected
+                  {selectedActivities.length} activit
+                  {selectedActivities.length !== 1 ? "ies" : "y"} selected
                 </p>
                 <p className="text-sm text-gray-500">
-                  Total duration: {formatDuration(selectedActivities.reduce((sum, a) => sum + a.duration, 0))}
+                  Total duration:{" "}
+                  {formatDuration(
+                    selectedActivities.reduce((sum, a) => sum + a.duration, 0)
+                  )}
                 </p>
               </div>
               <button
