@@ -35,12 +35,11 @@ export default function HomePage() {
             </h1>
           </div>
 
-          {/* Subtitle */}
           <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             Discover amazing destinations, create unforgettable memories, and plan your journey with intelligent recommendations
           </p>
 
-          {/* Feature highlights */}
+   
           <div className="flex flex-wrap justify-center gap-4 text-sm">
             <span className="px-4 py-2 bg-orange-50 text-orange-600 rounded-full border border-orange-200">
               🗺️ Smart Itineraries
