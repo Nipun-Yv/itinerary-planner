@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
-export default function ActivitiesPage({ params }) {
+export default function ActivitiesPage({ params}:{params:any}) {
   const [activities, setActivities] = useState([]);
   const [attractions, setAttractions] = useState([]);
   const [selectedActivities, setSelectedActivities] = useState([]);

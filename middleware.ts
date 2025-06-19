@@ -23,7 +23,7 @@ export function middleware(request: NextRequest) {
 
   // Redirect logged-in user away from auth pages
   if (isAuthenticated && authRoutes.some(route => pathname.startsWith(route))) {
-    return NextResponse.redirect(new URL('/itinerary', request.url))
+    return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
   // Redirect unauthenticated users to auth
