@@ -1,0 +1,151 @@
+"use client";
+import { CalendarActivity, ItineraryItem } from "@/types/Activity";
+import { ConnectionStatus, SSEMessage } from "@/types/SSE";
+import axios from "axios";
+import { redirect } from "next/navigation";
+import React, { useEffect, useRef, useState } from "react";
+
+const useStreaming = () => {
+  const [itineraryItems, setItineraryItems] = useState<ItineraryItem[]>([]);
+  const [connectionStatus, setConnectionStatus] =useState<ConnectionStatus>("disconnected");
+  const [error, setError] = useState<string | null>(null);
+  const [isComplete, setIsComplete] = useState<boolean>(false);
+  const eventSourceRef = useRef<EventSource | null>(null);
+  const [events, setEvents] = useState<CalendarActivity[]>([]);
+  const startStreaming = async () => {
+    // Reset state
+    setItineraryItems([]);
+    setError(null);
+    setIsComplete(false);
+    setConnectionStatus("connecting");
+
+    // Close existing connection if any
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+    }
+
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+    // Create new EventSource connection
+
+    const { data: user } = await axios.get("/api/user");
+    if (!user) {
+      redirect("/auth");
+    }
+    const eventSource = new EventSource(
+      `${apiUrl}/stream-itinerary-sse/${user.id}`
+    );
+    eventSourceRef.current = eventSource;
+
+    eventSource.onopen = (): void => {
+      setConnectionStatus("connected");
+      console.log("SSE connection opened");
+    };
+
+    eventSource.onmessage = (event: MessageEvent): void => {
+      try {
+        const data: SSEMessage = JSON.parse(event.data);
+
+        switch (data.type) {
+          case "connected":
+            console.log("Stream started:", data.message);
+            break;
+
+          case "item":
+            if (data.data) {
+              // Add new itinerary item
+              setItineraryItems((prev) => [...prev, data.data!]);
+              console.log("New itinerary item:", data.data);
+            }
+            break;
+
+          case "complete":
+            console.log("Itinerary generation complete");
+            setIsComplete(true);
+            setConnectionStatus("completed");
+            eventSource.close();
+            break;
+
+          case "error":
+            console.error("Server error:", data.message);
+            setError(data.message || "Unknown server error");
+            setConnectionStatus("error");
+            eventSource.close();
+            break;
+
+          default:
+            console.log("Unknown message type:", data);
+        }
+      } catch (err) {
+        console.error("Error parsing SSE data:", err);
+        setError("Failed to parse server response");
+      }
+    };
+
+    eventSource.onerror = (event: Event): void => {
+      console.error("SSE error:", event);
+      setConnectionStatus("error");
+      setError("Connection error occurred");
+      eventSource.close();
+    };
+  };
+
+  const stopStreaming = (): void => {
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+      eventSourceRef.current = null;
+    }
+    setConnectionStatus("disconnected");
+  };
+
+  // Cleanup on component unmount
+  useEffect(() => {
+    return (): void => {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+      }
+    };
+  }, []);
+  const formatDate = (timeString: string): Date => {
+    const date = new Date(timeString);
+    return date;
+  };
+  const getActivityColor = (
+    activityType: ItineraryItem["activity_type"]
+  ): string => {
+    switch (activityType) {
+      case "adventure":
+        return "#ea580c";
+      case "tourist attraction":
+        return "#fb923c";
+      case "rest":
+        return "white";
+      case "commute":
+        return "#fdba74";
+      default:
+        return "#fed7aa";
+    }
+  };
+  useEffect(() => {
+    const updateEventList = (itineraryItems: ItineraryItem[]) => {
+      setEvents(
+        itineraryItems.map((item) => {
+          return {
+            title: item.activity_name,
+            start: formatDate(item.start_time),
+            end: formatDate(item.end_time),
+            color: getActivityColor(item.activity_type),
+            activity_type: item.activity_type,
+          };
+        })
+      );
+    };
+    if (itineraryItems) {
+      updateEventList(itineraryItems);
+    }
+  }, [itineraryItems]);
+
+  return {itineraryItems,connectionStatus,error,isComplete,events,startStreaming,stopStreaming}
+};
+
+export default useStreaming;
