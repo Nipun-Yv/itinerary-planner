@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { cookies } from 'next/headers'
 import { prisma } from './prisma'
+import { redirect } from 'next/navigation'
 
 const JWT_SECRET = process.env.JWT_SECRET!
 
@@ -64,7 +65,7 @@ export async function getCurrentUser() {
 export async function requireAuth() {
   const user = await getCurrentUser()
   if (!user) {
-    throw new Error('Authentication required')
+    redirect("/auth");
   }
   return user
 }
