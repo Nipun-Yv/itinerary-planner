@@ -61,6 +61,23 @@ export default function ActivitiesPage({ params }: { params: any }) {
     });
   };
 
+  // Calculate total cost
+  const getTotalCost = () => {
+    return selectedActivities.reduce((total, activity) => {
+      return total + (activity.price || 0);
+    }, 0);
+  };
+
+  // Format currency
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
   const getActivityIcon = (category) => {
     const icons = {
       adventure: "🏔️",
@@ -217,15 +234,23 @@ export default function ActivitiesPage({ params }: { params: any }) {
         </div>
       </div>
 
-      {/* Selected Activities Counter */}
+      {/* Selected Activities Counter with Cost */}
       {selectedActivities.length > 0 && (
         <div className="bg-orange-500 text-white py-3">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between">
-              <span className="font-medium">
-                {selectedActivities.length} activit
-                {selectedActivities.length !== 1 ? "ies" : "y"} selected
-              </span>
+              <div className="flex items-center space-x-4">
+                <span className="font-medium">
+                  {selectedActivities.length} activit
+                  {selectedActivities.length !== 1 ? "ies" : "y"} selected
+                </span>
+                <div className="flex items-center space-x-1 bg-white/20 rounded-lg px-3 py-1">
+                  <span className="text-sm">💰</span>
+                  <span className="font-semibold">
+                    Total: {formatCurrency(getTotalCost())}
+                  </span>
+                </div>
+              </div>
               <button
                 onClick={proceedToAI}
                 className="bg-white text-orange-500 px-6 py-2 rounded-lg font-semibold hover:bg-orange-50 transition-colors"
@@ -311,7 +336,14 @@ export default function ActivitiesPage({ params }: { params: any }) {
 
                       <div className="flex items-center space-x-3 text-sm text-gray-500">
                         <span>⏱️ {formatDuration(activity.duration)}</span>
-                        {activity.price && <span>💰 ₹{activity.price}</span>}
+                        {activity.price && (
+                          <span className="font-medium text-green-600">
+                            💰 {formatCurrency(activity.price)}
+                          </span>
+                        )}
+                        {!activity.price && (
+                          <span className="text-gray-400">💰 Free</span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -322,7 +354,7 @@ export default function ActivitiesPage({ params }: { params: any }) {
         )}
       </div>
 
-      {/* Bottom Action Bar */}
+      {/* Bottom Action Bar with Enhanced Cost Display */}
       {selectedActivities.length > 0 && (
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -332,12 +364,16 @@ export default function ActivitiesPage({ params }: { params: any }) {
                   {selectedActivities.length} activit
                   {selectedActivities.length !== 1 ? "ies" : "y"} selected
                 </p>
-                <p className="text-sm text-gray-500">
-                  Total duration:{" "}
-                  {formatDuration(
-                    selectedActivities.reduce((sum, a) => sum + a.duration, 0)
-                  )}
-                </p>
+                <div className="flex items-center space-x-4 text-sm text-gray-500">
+                  <span>
+                    Duration: {formatDuration(
+                      selectedActivities.reduce((sum, a) => sum + a.duration, 0)
+                    )}
+                  </span>
+                  <span className="text-green-600 font-semibold">
+                    Total Cost: {formatCurrency(getTotalCost())}
+                  </span>
+                </div>
               </div>
               <button
                 onClick={proceedToAI}
