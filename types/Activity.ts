@@ -9,6 +9,7 @@ export interface Activity{
     longitude:number;
 }
 export interface ItineraryItem { // retrieved raw LLM response structure
+  activity_id:string;
   activity_name: string; 
   activity_type: 'rest' | 'adventure' | 'tourist attraction' | 'commute';
   start_time: string;

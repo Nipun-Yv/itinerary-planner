@@ -260,6 +260,10 @@ body > div > div > div > div.rbc-time-view > div.rbc-time-content > div.rbc-time
   font-weight: 500;
 }
 
+body > div > div > div > div > div.flex.w-full.gap-2 > div.min-h-screen.bg-gradient-to-br.from-orange-50.to-white.flex-3\/4 > div.bg-white.rounded-xl.shadow-lg.border.border-orange-100.overflow-hidden.backdrop-blur-sm > div > div.rbc-time-view > div.rbc-time-content  div.rbc-events-container{
+  margin-right: 0!important ;
+}
+
 body > div > div > div > div.rbc-time-view > div.rbc-time-content > div {
   border-left: 1px solid var(--orange-200) !important;
   border-right: none !important;
@@ -272,3 +276,8 @@ body > div > div > div > div.rbc-time-view > div.rbc-time-content > div {
 .rbc-timeslot-group {
   border-bottom: 1px solid var(--orange-100) !important;
 }
+
+/* .rbc-time-slot .rbc-label{
+  color:#ea580c!important;
+  font-weight: 100;
+} */

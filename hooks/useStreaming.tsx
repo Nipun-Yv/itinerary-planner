@@ -1,4 +1,5 @@
 "use client";
+import { useStreamingContext } from "@/contexts/StreamingContext";
 import { CalendarActivity, ItineraryItem } from "@/types/Activity";
 import { ConnectionStatus, SSEMessage } from "@/types/SSE";
 import axios from "axios";
@@ -6,12 +7,12 @@ import { redirect } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 
 const useStreaming = () => {
-  const [itineraryItems, setItineraryItems] = useState<ItineraryItem[]>([]);
+  const {itineraryItems, setItineraryItems,isComplete,setIsComplete} = useStreamingContext();
   const [connectionStatus, setConnectionStatus] =useState<ConnectionStatus>("disconnected");
   const [error, setError] = useState<string | null>(null);
-  const [isComplete, setIsComplete] = useState<boolean>(false);
   const eventSourceRef = useRef<EventSource | null>(null);
   const [events, setEvents] = useState<CalendarActivity[]>([]);
+  console.log(itineraryItems,connectionStatus,error,isComplete);
   const startStreaming = async () => {
     // Reset state
     setItineraryItems([]);
@@ -62,6 +63,7 @@ const useStreaming = () => {
           case "complete":
             console.log("Itinerary generation complete");
             setIsComplete(true);
+            console.log(isComplete)
             setConnectionStatus("completed");
             eventSource.close();
             break;
@@ -140,12 +142,19 @@ const useStreaming = () => {
         })
       );
     };
-    if (itineraryItems) {
       updateEventList(itineraryItems);
-    }
   }, [itineraryItems]);
 
   return {itineraryItems,connectionStatus,error,isComplete,events,startStreaming,stopStreaming}
 };
 
 export default useStreaming;
+
+// {activity_name: "Morning walk",
+//   activity_type:  'adventure',
+//   start_time: '2025-06-17T08:00:00',
+//   end_time:'2025-06-17T10:00:00' },
+// {activity_name: "Morning walk",
+//   activity_type:  'adventure',
+//   start_time: '2025-06-17T11:00:00',
+//   end_time:'2025-06-17T12:00:00' }
