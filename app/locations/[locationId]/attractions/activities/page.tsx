@@ -1,21 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
 
 export default function ActivitiesPage({ params }: { params: any }) {
+  const {locationId}=React.use(params) as any;
   const [activities, setActivities] = useState([]);
-  const [attractions, setAttractions] = useState([]);
+  const [attractions, setAttractions] = useState<any>([]);
   const [selectedActivities, setSelectedActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
-
   const router = useRouter();
   const searchParams = useSearchParams();
   const attractionIds = searchParams.get("attractions")?.split(",") || [];
-
   useEffect(() => {
     if (attractionIds.length > 0) {
       fetchData();
@@ -133,10 +132,10 @@ export default function ActivitiesPage({ params }: { params: any }) {
         router.push("/auth");
         return;
       }
-
       await axios.post(`${springApiBaseUrl}/activities`, {
         selectedActivities: activityIds,
         userId: user.id,
+        locationId:attractions[0]?.location.id
       });
       router.push("/itinerary")
     } catch (err: any) {

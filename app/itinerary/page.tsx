@@ -10,6 +10,7 @@ import { StreamingContextProvider } from "@/contexts/StreamingContext";
 
 const ItineraryPage = () => {
   const [selectedActivities, setSelectedActivities] = useState<Activity[]>([]);
+  console.log(selectedActivities)
   const [isLoading, setIsLoading] = useState<boolean>(true);
   useEffect(() => {
     async function getActivities() {
