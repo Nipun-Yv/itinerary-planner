@@ -29,6 +29,7 @@ model Location {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   attractions Attraction[]
+  hotels      hotels[]
   itineraries Itinerary[]
 
   @@map("locations")
@@ -111,4 +112,23 @@ model ItineraryItem {
   itinerary    Itinerary   @relation(fields: [itineraryId], references: [id])
 
   @@map("itinerary_items")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model hotels {
+  id               Int       @id @default(autoincrement())
+  name             String
+  latitude         Decimal?  @db.Decimal(10, 8)
+  longitude        Decimal?  @db.Decimal(11, 8)
+  star_rating      Int?
+  user_rating      Decimal?  @db.Decimal(2, 1)
+  description      String?
+  room_description String?
+  amenities_list   String?
+  hotel_image_urls String?
+  room_image_url   String?
+  price            Int?
+  locationId       String?
+  address          String?
+  locations        Location? @relation(fields: [locationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
