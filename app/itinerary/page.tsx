@@ -7,9 +7,14 @@ import { redirect } from "next/navigation";
 import { CalendarDays, Filter, MapPin, Plus } from "lucide-react";
 import RouteMap from "@/components/RouteMap";
 import { StreamingContextProvider } from "@/contexts/StreamingContext";
+import { HotelCarousel } from "@/components/HotelCarousel";
+import { HotelProvider, useHotelContext } from "@/contexts/HotelContext";
+import { useAutoScroll } from "@/hooks/useAutoScroll";
 
 const ItineraryPage = () => {
   const [selectedActivities, setSelectedActivities] = useState<Activity[]>([]);
+  const {hotels}=useHotelContext();
+  const carouselRef = useAutoScroll(hotels);
   console.log(selectedActivities)
   const [isLoading, setIsLoading] = useState<boolean>(true);
   useEffect(() => {
@@ -129,9 +134,9 @@ const ItineraryPage = () => {
               <div className="flex w-full gap-2">
                 <TripCalendar />
                 <RouteMap />
-                {/* <div className="flex-1/4 bg-amber-600">
-
-              </div> */}
+              </div>
+              <div ref={carouselRef}>
+                <HotelCarousel hotels={hotels} />
               </div>
             </div>
           </div>

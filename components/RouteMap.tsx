@@ -97,6 +97,7 @@ import axios from "axios";
 import { useStreamingContext } from "@/contexts/StreamingContext";
 import { useMap } from "@/contexts/MapContext"; // <-- Import your custom hook
 import { redirect } from "next/navigation";
+import { useHotelContext } from "@/contexts/HotelContext";
 
 const containerStyle: React.CSSProperties = {
   width: "100%",
@@ -112,6 +113,7 @@ export default function RouteMap() {
   // Use the context to get the loaded state. No more direct calls to useJsApiLoader here.
   const { isLoaded, loadError } = useMap();
   const { isComplete, itineraryItems } = useStreamingContext();
+  const {setHotels}=useHotelContext();
   const [locations, setLocations] = useState<DecodedPath[]>([]);
   const [hotelLocations,setHotelLocations]=useState<DecodedPath[]>([]);
   const [routePath, setRoutePath] = useState<DecodedPath[]>([]);
@@ -240,7 +242,8 @@ export default function RouteMap() {
             locationList:routePath
           }
         );
-       setHotelLocations(response.data.data.map((element:any)=>({lat:element.latitude,lng:element.longitude})))
+       setHotelLocations(response.data.data.map((element:any)=>({lat:element.latitude,lng:element.longitude})));
+       setHotels(response.data.data);
       }
       catch(error:any){
         console.error(error.message)

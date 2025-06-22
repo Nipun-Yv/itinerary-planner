@@ -48,7 +48,6 @@ async function getHotel(hotelId: string): Promise<Hotel | null> {
     if (isNaN(hotelIdNum)) {
       return null;
     }
-
     const hotel = await prisma.hotels.findUnique({
       where: {
         id: hotelIdNum
@@ -79,9 +78,9 @@ export default async function HotelDetailsPage({ params }: PageProps) {
   }
 
   // Parse amenities and images
-  const amenities: string[] = hotel.amenities_list ? hotel.amenities_list.split(',').map(a => a.trim()) : [];
+  const amenities: string[] = hotel.amenities_list ? hotel.amenities_list.split(';').map(a => a.trim()) : [];
   const hotelImages: string[] = hotel.hotel_image_urls ? hotel.hotel_image_urls.split(',').map(url => url.trim()) : [];
-  const roomImages: string[] = hotel.room_image_url ? hotel.room_image_url.split(',').map(url => url.trim()) : [];
+  const roomImages: string[] = hotel.room_image_url ? hotel.room_image_url.split(';').map(url => url.trim()) : [];
   
   // Filter out invalid URLs and clean the image URLs
   const cleanImageUrl = (url: string): string => {
