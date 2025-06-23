@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Star, MapPin, Wifi, Car, Coffee, Dumbbell, Users, ArrowLeft, Heart, Share } from 'lucide-react';
+import { Star, MapPin, Wifi, Car, Coffee, Dumbbell, Users, ArrowLeft, Heart, Share, Calendar, Clock, Shield } from 'lucide-react';
 import HotelImageSlider from '@/components/HotelImageSlider';
 import BookingSidebar from '@/components/BookingSidebar';
 
@@ -96,25 +96,33 @@ export default async function HotelDetailsPage({ params }: PageProps) {
   const starRating: number = hotel.star_rating || 0;
   const userRating: number = parseFloat(hotel.user_rating?.toString() || '0') || 0;
 
+  // Create Google Maps embed URL
+  const createMapUrl = (lat: number, lng: number, hotelName: string): string => {
+    const encodedName = encodeURIComponent(hotelName);
+    return `https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || 'YOUR_API_KEY'}&q=${lat},${lng}&zoom=15&maptype=roadmap`;
+  };
+
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50">
       {/* Header Navigation */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-orange-100 px-6 py-4">
-        <div className="flex justify-between items-center max-w-7xl mx-auto">
-          <Link href="/hotels" className="flex items-center gap-2 text-orange-500 hover:text-orange-600 transition-colors">
-            <ArrowLeft className="w-5 h-5" />
-            <span className="font-medium">Back to Hotels</span>
-          </Link>
-          
-          <div className="flex items-center gap-4">
-            <button className="flex items-center gap-2 px-4 py-2 text-muted-foreground hover:text-orange-500 transition-colors rounded-lg hover:bg-orange-50">
-              <Share className="w-4 h-4" />
-              <span className="hidden sm:inline">Share</span>
-            </button>
-            <button className="flex items-center gap-2 px-4 py-2 text-muted-foreground hover:text-orange-500 transition-colors rounded-lg hover:bg-orange-50">
-              <Heart className="w-4 h-4" />
-              <span className="hidden sm:inline">Save</span>
-            </button>
+      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-lg border-b border-orange-100 shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex justify-between items-center">
+            <Link href="/hotels" className="flex items-center gap-2 text-orange-600 hover:text-orange-700 transition-colors group">
+              <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+              <span className="font-semibold">Back to Hotels</span>
+            </Link>
+            
+            <div className="flex items-center gap-2">
+              <button className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-orange-600 transition-colors rounded-xl hover:bg-orange-50 group">
+                <Share className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                <span className="hidden sm:inline font-medium">Share</span>
+              </button>
+              <button className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-red-500 transition-colors rounded-xl hover:bg-red-50 group">
+                <Heart className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                <span className="hidden sm:inline font-medium">Save</span>
+              </button>
+            </div>
           </div>
         </div>
       </nav>
@@ -122,130 +130,268 @@ export default async function HotelDetailsPage({ params }: PageProps) {
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Hotel Title Section */}
         <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{hotel.name}</h1>
-          
-          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-4">
-            {/* Star Rating */}
-            <div className="flex items-center gap-1">
-              {[...Array(5)].map((_, i) => (
-                <Star 
-                  key={i} 
-                  className={`w-4 h-4 ${i < starRating ? 'fill-orange-400 text-orange-400' : 'text-gray-300'}`} 
-                />
-              ))}
-              <span className="ml-1 font-medium">{starRating} star hotel</span>
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-6">
+            <div className="flex-1">
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 leading-tight">{hotel.name}</h1>
+              
+              <div className="flex flex-wrap items-center gap-6 text-sm mb-4">
+                {/* Star Rating */}
+                <div className="flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm border border-orange-100">
+                  <div className="flex items-center gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <Star 
+                        key={i} 
+                        className={`w-4 h-4 ${i < starRating ? 'fill-orange-400 text-orange-400' : 'text-gray-300'}`} 
+                      />
+                    ))}
+                  </div>
+                  <span className="font-semibold text-gray-700">{starRating} Star Hotel</span>
+                </div>
+
+                {/* User Rating */}
+                {userRating > 0 && (
+                  <div className="flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm border border-orange-100">
+                    <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                      {userRating}
+                    </div>
+                    <span className="font-semibold text-gray-700">Guest Rating</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Location */}
+              {hotel.locations && (
+                <div className="flex items-center gap-2 text-gray-600 mb-2">
+                  <MapPin className="w-5 h-5 text-orange-500" />
+                  <span className="font-medium">{hotel.locations.name}, {hotel.locations.state}</span>
+                </div>
+              )}
+
+              {hotel.address && (
+                <p className="text-gray-600 text-lg">{hotel.address}</p>
+              )}
             </div>
 
-            {/* User Rating */}
-            {userRating > 0 && (
-              <div className="flex items-center gap-1">
-                <div className="bg-orange-500 text-white px-2 py-1 rounded-md text-xs font-bold">
-                  {userRating}
+            {/* Quick Actions */}
+            <div className="flex flex-col sm:flex-row lg:flex-col gap-3 lg:w-48">
+              <div className="bg-white rounded-2xl p-4 shadow-sm border border-orange-100">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-orange-600">₹{hotel.price?.toLocaleString()}</div>
+                  <div className="text-sm text-gray-500">per night</div>
                 </div>
-                <span>Guest rating</span>
               </div>
-            )}
-
-            {/* Location */}
-            {hotel.locations && (
-              <div className="flex items-center gap-1">
-                <MapPin className="w-4 h-4 text-orange-500" />
-                <span>{hotel.locations.name}, {hotel.locations.state}</span>
+              <div className="flex sm:flex-col gap-2">
+                <button className="flex-1 bg-orange-600 text-white px-4 py-3 rounded-xl font-semibold hover:bg-orange-700 transition-colors shadow-sm">
+                  Book Now
+                </button>
+                <button className="flex-1 border-2 border-orange-600 text-orange-600 px-4 py-3 rounded-xl font-semibold hover:bg-orange-50 transition-colors">
+                  Check Availability
+                </button>
               </div>
-            )}
+            </div>
           </div>
+        </div>
 
-          {hotel.address && (
-            <p className="text-muted-foreground">{hotel.address}</p>
+        {/* Enhanced Image Gallery */}
+        <div className="mb-10">
+          {allImages.length > 0 ? (
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 h-96 lg:h-[500px]">
+              {/* Main Image */}
+              <div className="lg:col-span-2 lg:row-span-2 relative overflow-hidden rounded-2xl shadow-lg">
+                <Image
+                  src={allImages[0]}
+                  alt={`${hotel.name} - Main View`}
+                  fill
+                  className="object-cover hover:scale-105 transition-transform duration-500"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 50vw"
+                  priority
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+              </div>
+              
+              {/* Side Images */}
+              {allImages.slice(1, 5).map((image, index) => (
+                <div key={index} className="relative overflow-hidden rounded-2xl shadow-lg">
+                  <Image
+                    src={image}
+                    alt={`${hotel.name} - View ${index + 2}`}
+                    fill
+                    className="object-cover hover:scale-105 transition-transform duration-500"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 25vw, 25vw"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
+                </div>
+              ))}
+              
+              {/* Show More Button */}
+              {allImages.length > 5 && (
+                <div className="relative overflow-hidden rounded-2xl shadow-lg">
+                  <Image
+                    src={allImages[5]}
+                    alt={`${hotel.name} - View 6`}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 25vw, 25vw"
+                  />
+                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                    <button className="text-white font-semibold text-lg hover:text-orange-200 transition-colors">
+                      +{allImages.length - 5} More Photos
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="h-96 bg-gradient-to-r from-orange-100 to-orange-200 rounded-2xl flex items-center justify-center">
+              <div className="text-center text-gray-600">
+                <div className="w-16 h-16 bg-orange-300 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Image className="w-8 h-8" />
+                </div>
+                <p className="text-lg font-medium">No images available</p>
+              </div>
+            </div>
           )}
         </div>
 
-        {/* Image Slider - Replaced the grid layout */}
-        <HotelImageSlider 
-          images={allImages} 
-          hotelName={hotel.name}
-          className="mb-8"
-        />
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-10">
             {/* Hotel Description */}
             {hotel.description && (
-              <section>
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">About this hotel</h2>
-                <p className="text-muted-foreground leading-relaxed">{hotel.description}</p>
+              <section className="bg-white rounded-2xl p-8 shadow-sm border border-orange-100">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                  <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                    <Shield className="w-4 h-4 text-orange-600" />
+                  </div>
+                  About This Hotel
+                </h2>
+                <p className="text-gray-700 leading-relaxed text-lg">{hotel.description}</p>
               </section>
             )}
 
             {/* Room Description */}
             {hotel.room_description && (
-              <section>
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Room Details</h2>
-                <p className="text-muted-foreground leading-relaxed">{hotel.room_description}</p>
+              <section className="bg-white rounded-2xl p-8 shadow-sm border border-orange-100">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                  <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                    <Calendar className="w-4 h-4 text-orange-600" />
+                  </div>
+                  Room Details
+                </h2>
+                <p className="text-gray-700 leading-relaxed text-lg">{hotel.room_description}</p>
               </section>
             )}
 
             {/* Amenities */}
             {amenities.length > 0 && (
-              <section>
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Amenities</h2>
+              <section className="bg-white rounded-2xl p-8 shadow-sm border border-orange-100">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                  <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                    <Clock className="w-4 h-4 text-orange-600" />
+                  </div>
+                  Amenities & Services
+                </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {amenities.map((amenity, index) => (
-                    <div key={index} className="flex items-center gap-3 p-3 rounded-lg hover:bg-orange-50 transition-colors">
-                      {getAmenityIcon(amenity)}
-                      <span className="text-muted-foreground">{amenity}</span>
+                    <div key={index} className="flex items-center gap-4 p-4 rounded-xl hover:bg-orange-50 transition-colors border border-gray-100">
+                      <div className="flex-shrink-0">
+                        {getAmenityIcon(amenity)}
+                      </div>
+                      <span className="text-gray-700 font-medium">{amenity}</span>
                     </div>
                   ))}
                 </div>
               </section>
             )}
 
-            {/* Location */}
+            {/* Location with Interactive Map */}
             {(hotel.latitude && hotel.longitude) && (
-              <section>
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Location</h2>
-                <div className="bg-gray-100 rounded-xl h-64 flex items-center justify-center">
-                  <div className="text-center text-muted-foreground">
-                    <MapPin className="w-8 h-8 mx-auto mb-2 text-orange-500" />
-                    <p>Map would be displayed here</p>
-                    <p className="text-sm">
-                      Lat: {typeof hotel.latitude === 'number' ? hotel.latitude.toFixed(6) : hotel.latitude?.toString()}, 
-                      Lng: {typeof hotel.longitude === 'number' ? hotel.longitude.toFixed(6) : hotel.longitude?.toString()}
-                    </p>
+              <section className="bg-white rounded-2xl p-8 shadow-sm border border-orange-100">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                  <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                    <MapPin className="w-4 h-4 text-orange-600" />
+                  </div>
+                  Location & Map
+                </h2>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4 p-4 bg-orange-50 rounded-xl">
+                    <MapPin className="w-5 h-5 text-orange-600" />
+                    <div>
+                      <p className="font-medium text-gray-900">{hotel.address}</p>
+                      <p className="text-sm text-gray-600">
+                        Coordinates: {typeof hotel.latitude === 'number' ? hotel.latitude.toFixed(6) : hotel.latitude?.toString()}, {typeof hotel.longitude === 'number' ? hotel.longitude.toFixed(6) : hotel.longitude?.toString()}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="rounded-xl overflow-hidden shadow-sm border border-gray-200">
+                    <iframe
+                      src={`https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3000!2d${hotel.longitude}!3d${hotel.latitude}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zM${Math.abs(hotel.latitude)}°${hotel.latitude >= 0 ? 'N' : 'S'}%20${Math.abs(hotel.longitude)}°${hotel.longitude >= 0 ? 'E' : 'W'}!5e0!3m2!1sen!2sin!4v1638360721111!5m2!1sen!2sin`}
+                      width="100%"
+                      height="400"
+                      style={{ border: 0 }}
+                      allowFullScreen
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      title={`${hotel.name} Location Map`}
+                    />
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-3">
+                    <a
+                      href={`https://www.google.com/maps/dir/?api=1&destination=${hotel.latitude},${hotel.longitude}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                    >
+                      <MapPin className="w-4 h-4" />
+                      Get Directions
+                    </a>
+                    <a
+                      href={`https://www.google.com/maps/search/?api=1&query=${hotel.latitude},${hotel.longitude}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-4 py-2 border border-orange-600 text-orange-600 rounded-lg hover:bg-orange-50 transition-colors"
+                    >
+                      <MapPin className="w-4 h-4" />
+                      View on Google Maps
+                    </a>
                   </div>
                 </div>
               </section>
             )}
           </div>
 
-          {/* Booking Sidebar */}
-          <BookingSidebar 
-            hotelName={hotel.name}
-            price={hotel.price}
-            />
-                  
+          {/* Enhanced Booking Sidebar */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-24">
+              <BookingSidebar 
+                hotelName={hotel.name}
+                price={hotel.price}
+              />
             </div>
           </div>
+        </div>
+      </div>
     </main>
   );
 }
 
-// Helper function to get amenity icons
+// Enhanced helper function to get amenity icons
 function getAmenityIcon(amenity: string): JSX.Element {
   const amenityLower = amenity.toLowerCase();
   
   if (amenityLower.includes('wifi') || amenityLower.includes('internet')) {
-    return <Wifi className="w-5 h-5 text-orange-500" />;
+    return <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"><Wifi className="w-5 h-5 text-blue-600" /></div>;
   } else if (amenityLower.includes('parking') || amenityLower.includes('car')) {
-    return <Car className="w-5 h-5 text-orange-500" />;
+    return <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center"><Car className="w-5 h-5 text-green-600" /></div>;
   } else if (amenityLower.includes('coffee') || amenityLower.includes('breakfast')) {
-    return <Coffee className="w-5 h-5 text-orange-500" />;
+    return <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center"><Coffee className="w-5 h-5 text-amber-600" /></div>;
   } else if (amenityLower.includes('gym') || amenityLower.includes('fitness')) {
-    return <Dumbbell className="w-5 h-5 text-orange-500" />;
+    return <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center"><Dumbbell className="w-5 h-5 text-red-600" /></div>;
   } else if (amenityLower.includes('pool') || amenityLower.includes('spa')) {
-    return <Users className="w-5 h-5 text-orange-500" />;
+    return <div className="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center"><Users className="w-5 h-5 text-cyan-600" /></div>;
   } else {
-    return <div className="w-5 h-5 bg-orange-500 rounded-full flex-shrink-0" />;
+    return <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center"><div className="w-5 h-5 bg-orange-500 rounded-full" /></div>;
   }
 }
