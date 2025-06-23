@@ -337,11 +337,11 @@ export default function ActivitiesPage({ params }: { params: any }) {
                         <span>⏱️ {formatDuration(activity.duration)}</span>
                         {activity.price && (
                           <span className="font-medium text-green-600">
-                            💰 {formatCurrency(activity.price)}
+                            {formatCurrency(activity.price)}
                           </span>
                         )}
                         {!activity.price && (
-                          <span className="text-gray-400">💰 Free</span>
+                          <span className="text-gray-400"> Fee</span>
                         )}
                       </div>
                     </div>
