@@ -5,12 +5,21 @@ import { useEffect, useState } from "react";
 import { Activity } from "@/types/Activity";
 import axios from "axios";
 import { redirect } from "next/navigation";
-import { CalendarDays, Filter, MapPin, Plus } from "lucide-react";
+import {
+  CalendarDays,
+  Check,
+  Filter,
+  Loader2Icon,
+  MapPin,
+  Plus,
+} from "lucide-react";
 import RouteMap from "@/components/RouteMap";
 import { StreamingContextProvider } from "@/contexts/StreamingContext";
 import { HotelCarousel } from "@/components/HotelCarousel";
 import { useHotelContext } from "@/contexts/HotelContext";
 import { useAutoScroll } from "@/hooks/useAutoScroll";
+import ItineraryLoadingBar from "@/components/ItineraryLoadingBar";
+import ActivityNameList from "@/components/ActivityNameList";
 
 const ItineraryPage = () => {
   const [selectedActivities, setSelectedActivities] = useState<Activity[]>([]);
@@ -68,7 +77,7 @@ const ItineraryPage = () => {
         <div className="h-full p-6">
           <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white p-4">
             <div className="max-w-7xl mx-auto">
-              {/* Header */}
+
               <div className="bg-white rounded-xl shadow-lg border border-orange-100 p-6 mb-6 backdrop-blur-sm">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
@@ -80,50 +89,22 @@ const ItineraryPage = () => {
                         Trip Calendar
                       </h1>
                       <p className="text-orange-600">
-                        Manage your travel itinerary
+                        View your travel itinerary
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-3">
-                    
-                  </div>
+                  <div className="flex items-center space-x-3"></div>
                 </div>
               </div>
 
               {/* Stats */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div className="bg-white rounded-xl p-6 border border-orange-100 shadow-lg hover:shadow-xl transition-shadow">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-orange-600 font-medium">
-                        No. of activities
-                      </p>
-                      <p className="text-2xl font-bold text-gray-900">
-                        {selectedActivities.length}
-                      </p>
-                    </div>
-                    <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                      <CalendarDays className="w-5 h-5 text-orange-600" />
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-white rounded-xl p-6 border border-orange-100 shadow-lg hover:shadow-xl transition-shadow">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-orange-600 font-medium">
-                        Trip to
-                      </p>
-                      <p className="text-2xl font-bold text-gray-900">
-                        {locationName || "Loading..."}
-                      </p>
-                    </div>
-                    <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                      <MapPin className="w-5 h-5 text-orange-600" />
-                    </div>
-                  </div>
-                </div>
+              <div className="gap-4 mb-6 h-[210px] flex">
+                <ItineraryLoadingBar count={selectedActivities.length} />
+                <ActivityNameList
+                  locationName={locationName}
+                  selectedActivities={selectedActivities}
+                />
               </div>
-
               <div className="flex w-full gap-2">
                 <TripCalendar />
                 <RouteMap />

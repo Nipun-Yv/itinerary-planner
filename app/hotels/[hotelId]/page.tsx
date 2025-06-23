@@ -129,7 +129,7 @@ export default async function HotelDetailsPage({ params }: PageProps) {
 
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Hotel Title Section */}
-        <div className="mb-8">
+        <div className="mb-8 border-b-[0.5] border-orange-500">
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-6">
             <div className="flex-1">
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 leading-tight">{hotel.name}</h1>

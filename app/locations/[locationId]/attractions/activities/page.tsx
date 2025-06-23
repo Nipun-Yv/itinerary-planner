@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
+import DraggableTextarea from "@/components/DraggableTextArea";
 
 export default function ActivitiesPage({ params }: { params: any }) {
   const {locationId}=React.use(params) as any;
@@ -179,8 +180,8 @@ export default function ActivitiesPage({ params }: { params: any }) {
       </div>
 
       {/* Selected Attractions Header */}
-      <div className="bg-orange-100 border-b border-orange-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div className="bg-orange-100 border-b border-orange-200 flex justify-between">
+        <div className="flex-2/3 px-2 sm:px-6 lg:px-8 py-4">
           <h2 className="text-lg font-semibold text-orange-800 mb-2">
             Selected Attractions:
           </h2>
@@ -194,6 +195,9 @@ export default function ActivitiesPage({ params }: { params: any }) {
               </span>
             ))}
           </div>
+        </div>
+        <div className="flex flex-1/3 p-2 justify-end">
+        <DraggableTextarea/>
         </div>
       </div>
 

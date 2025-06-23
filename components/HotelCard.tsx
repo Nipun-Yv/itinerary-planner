@@ -1,9 +1,11 @@
 import { Hotel } from "@/types/Hotel";
 import { Star } from "lucide-react";
+import Link from "next/link";
 
 export const HotelCard = ({ hotel }: { hotel: Hotel }) => (
+
   <div className="flex-shrink-0 w-80 bg-white rounded-2xl shadow-xl border border-orange-100 mx-4 overflow-hidden transform transition-all hover:scale-[1.02] hover:shadow-2xl">
-    {/* Hotel Image */}
+    <Link href={`/hotels/${hotel.id}`}>
     <div className="h-48 relative overflow-hidden">
       {hotel.hotel_image_urls && (
         <img
@@ -17,7 +19,7 @@ export const HotelCard = ({ hotel }: { hotel: Hotel }) => (
       </div>
     </div>
     
-    {/* Hotel Details */}
+
     <div className="p-5">
       <div className="flex justify-between items-start">
         <h3 className="font-bold text-lg text-gray-900 truncate mr-2">{hotel.name}</h3>
@@ -51,5 +53,6 @@ export const HotelCard = ({ hotel }: { hotel: Hotel }) => (
         </div>
       )}
     </div>
+    </Link>
   </div>
 );

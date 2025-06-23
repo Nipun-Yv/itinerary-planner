@@ -90,7 +90,7 @@ const TripCalendar = () => {
           onView={(newView) => setView(newView)}
           onSelectEvent={setSelectedEvent}
           step={10}
-          timeslots={2}
+          timeslots={1}
           view={view}
           date={date}
           style={{ height: "700px" }}
