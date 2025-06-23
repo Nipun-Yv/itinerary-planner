@@ -1,4 +1,5 @@
 "use client";
+
 import TripCalendar from "@/components/TripCalendar";
 import { useEffect, useState } from "react";
 import { Activity } from "@/types/Activity";
@@ -8,15 +9,16 @@ import { CalendarDays, Filter, MapPin, Plus } from "lucide-react";
 import RouteMap from "@/components/RouteMap";
 import { StreamingContextProvider } from "@/contexts/StreamingContext";
 import { HotelCarousel } from "@/components/HotelCarousel";
-import { HotelProvider, useHotelContext } from "@/contexts/HotelContext";
+import { useHotelContext } from "@/contexts/HotelContext";
 import { useAutoScroll } from "@/hooks/useAutoScroll";
 
 const ItineraryPage = () => {
   const [selectedActivities, setSelectedActivities] = useState<Activity[]>([]);
-  const {hotels}=useHotelContext();
+  const { hotels } = useHotelContext();
   const carouselRef = useAutoScroll(hotels);
-  console.log(selectedActivities)
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [locationName, setLocationName] = useState<string | null>(null);
+
   useEffect(() => {
     async function getActivities() {
       try {
@@ -24,20 +26,31 @@ const ItineraryPage = () => {
         if (!user) {
           redirect("/auth");
         }
+
         const springApiBaseUrl = process.env.NEXT_PUBLIC_SPRING_API_URL;
         const response = await axios.get(
           `${springApiBaseUrl}/activities?userId=${user.id}`
         );
 
-        setSelectedActivities(response.data.data);
+        const fetchedActivities = response.data.data;
+        setSelectedActivities(fetchedActivities);
+
+        if (fetchedActivities.length > 0) {
+          const locationRes = await axios.get(
+            `/api/location-from-activity?activityId=${fetchedActivities[0].id}`
+          );
+          setLocationName(locationRes.data.location || "Unknown");
+        }
       } catch (err: any) {
         console.log(err.message);
       } finally {
         setIsLoading(false);
       }
     }
+
     getActivities();
   }, []);
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 flex items-center justify-center">
@@ -48,24 +61,10 @@ const ItineraryPage = () => {
       </div>
     );
   }
+
   return (
     <StreamingContextProvider>
       <div className="w-full h-screen bg-gray-50">
-        {/* <div className="bg-white shadow-sm border-b px-6 py-4 flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Your Itinerary</h1>
-          <p className="text-gray-600">Welcome back!</p>
-        </div>
-        <div className="flex items-center gap-4">
-          <Link href="/plan">
-            <Button variant="outline" size="sm">
-              New Itinerary
-            </Button>
-          </Link>
-          <LogoutButton />
-        </div>
-      </div> */}
-
         <div className="h-full p-6">
           <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white p-4">
             <div className="max-w-7xl mx-auto">
@@ -86,14 +85,7 @@ const ItineraryPage = () => {
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <button className="inline-flex items-center px-4 py-2 bg-white border border-orange-200 rounded-lg text-sm font-medium text-orange-700 hover:bg-orange-50 transition-colors">
-                      <Filter className="w-4 h-4 mr-2" />
-                      Filter
-                    </button>
-                    <button className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-orange-400 to-orange-500 text-white rounded-lg text-sm font-medium hover:from-orange-500 hover:to-orange-600 shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Event
-                    </button>
+                    
                   </div>
                 </div>
               </div>
@@ -104,10 +96,10 @@ const ItineraryPage = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-orange-600 font-medium">
-                        no. of activities
+                        No. of activities
                       </p>
                       <p className="text-2xl font-bold text-gray-900">
-                        {5} fetch krke abhi it's mock
+                        {selectedActivities.length}
                       </p>
                     </div>
                     <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
@@ -122,7 +114,7 @@ const ItineraryPage = () => {
                         Trip to
                       </p>
                       <p className="text-2xl font-bold text-gray-900">
-                        location
+                        {locationName || "Loading..."}
                       </p>
                     </div>
                     <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
@@ -131,10 +123,12 @@ const ItineraryPage = () => {
                   </div>
                 </div>
               </div>
+
               <div className="flex w-full gap-2">
                 <TripCalendar />
                 <RouteMap />
               </div>
+
               <div ref={carouselRef}>
                 <HotelCarousel hotels={hotels} />
               </div>

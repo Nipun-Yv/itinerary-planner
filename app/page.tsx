@@ -13,12 +13,27 @@ export default function HomePage() {
       {/* Navigation */}
       <nav className="relative z-10 p-6">
         <div className="flex justify-between items-center max-w-7xl mx-auto">
-          <div className="text-xl font-bold text-orange-500">✈️ TripPlanner</div>
-          <div className="hidden md:flex space-x-6">
-            <button className="text-muted-foreground hover:text-orange-500 transition-colors">nav1</button>
-            <button className="text-muted-foreground hover:text-orange-500 transition-colors">nav2</button>
-            <button className="text-muted-foreground hover:text-orange-500 transition-colors">nav3</button>
+          <Link href="/" className="text-xl font-bold text-orange-500">
+            ✈️ TripPlanner
+          </Link>
+          <div className="hidden md:flex space-x-8">
+            <Link href="/about" className="text-muted-foreground hover:text-orange-500 transition-colors font-medium">
+              About Us
+            </Link>
+            <Link href="/hotels" className="text-muted-foreground hover:text-orange-500 transition-colors font-medium">
+              Hotels & Stays
+            </Link>
+            <Link href="/contact" className="text-muted-foreground hover:text-orange-500 transition-colors font-medium">
+              Contact
+            </Link>
           </div>
+          
+          {/* Mobile menu button */}
+          <button className="md:hidden text-orange-500">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
         </div>
       </nav>
 
@@ -36,19 +51,21 @@ export default function HomePage() {
           </div>
 
           <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Discover amazing destinations, create unforgettable memories, and plan your journey with intelligent recommendations
+            Skip the hassle of multiple platforms. Our AI creates personalized itineraries, finds perfect stays, and maps your journey—all in one place.
           </p>
 
-   
           <div className="flex flex-wrap justify-center gap-4 text-sm">
             <span className="px-4 py-2 bg-orange-50 text-orange-600 rounded-full border border-orange-200">
-              🗺️ Smart Itineraries
+              🤖 AI-Powered Planning
             </span>
             <span className="px-4 py-2 bg-orange-50 text-orange-600 rounded-full border border-orange-200">
-              💰 Budget Friendly
+              🗺️ Dynamic Itineraries
             </span>
             <span className="px-4 py-2 bg-orange-50 text-orange-600 rounded-full border border-orange-200">
-              🌟 Local Recommendations
+              💰 Budget Optimization
+            </span>
+            <span className="px-4 py-2 bg-orange-50 text-orange-600 rounded-full border border-orange-200">
+              🏨 Smart Hotel Matching
             </span>
           </div>
 
@@ -56,16 +73,20 @@ export default function HomePage() {
             <Link href="/auth">
               <button className="group relative px-8 py-4 bg-orange-500 hover:bg-orange-400 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-orange-500/25 min-w-[200px]">
                 Start Planning Now
+                <span className="ml-2">→</span>
               </button>
             </Link>
             
-            <button className="px-8 py-4 border-2 border-orange-500 text-orange-500 hover:bg-orange-50 font-semibold rounded-xl transition-all duration-300 min-w-[200px]">
-              Watch Demo(may add)
-            </button>
+            <Link href="/about">
+              <button className="px-8 py-4 border-2 border-orange-500 text-orange-500 hover:bg-orange-50 font-semibold rounded-xl transition-all duration-300 min-w-[200px]">
+                Learn More
+              </button>
+            </Link>
           </div>
         </div>
       </div>
 
+      {/* Floating decorative elements */}
       <div className="absolute bottom-10 left-10 text-orange-500/30 animate-bounce">
         <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
           <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
