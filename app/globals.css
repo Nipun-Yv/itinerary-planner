@@ -219,11 +219,13 @@ body > div > div > div > div.rbc-time-view > div.rbc-time-header.rbc-overflowing
 }
 
 .rbc-btn-group .rbc-active {
-  background-color: var(--orange-300) !important;
-  color: var(--orange-800) !important;
+  background-color: var(--orange-400) !important;
+  color: white !important;
   font-weight: 600;
 }
-
+body > div > div > div > div > div.flex.w-full.gap-2 > div.min-h-screen.bg-gradient-to-br.from-orange-50.to-white.flex-3\/4 > div.bg-white.rounded-xl.shadow-lg.border.border-orange-100.overflow-hidden.backdrop-blur-sm > div > div.rbc-toolbar  button.rbc-active{
+  color:white !important;
+}
 .rbc-today {
   background-color: var(--orange-50) !important;
   border-color: var(--orange-200) !important;
