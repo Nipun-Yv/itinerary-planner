@@ -2,7 +2,14 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { verifyToken } from '@/lib/auth'
 
-const protectedRoutes = ['/itinerary', '/profile','/plan','/locations','/dashboard']
+const protectedRoutes = [
+  '/itinerary',
+  '/hotels/',
+  '/profile',
+  '/plan',
+  '/locations',
+  '/dashboard',
+]
 const authRoutes = ['/auth']
 
 export function middleware(request: NextRequest) {
@@ -10,8 +17,7 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get('auth-token')?.value
 
   let isAuthenticated = false
-
-  // Safely verify token
+// verify token
   if (token) {
     try {
       verifyToken(token)
@@ -21,13 +27,21 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // Redirect logged-in user away from auth pages
+  // Redirect authenticated users away from auth routes
   if (isAuthenticated && authRoutes.some(route => pathname.startsWith(route))) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
-  // Redirect unauthenticated users to auth
-  if (!isAuthenticated && protectedRoutes.some(route => pathname.startsWith(route))) {
+  // Handle protected route logic
+  const isProtected = protectedRoutes.some(route =>
+    // exact match for routes like /dashboard
+    pathname === route ||
+    // protect sub-paths like /hotels/:id but not /hotels
+    (route.endsWith('/') && pathname.startsWith(route))
+  )
+
+  // Redirect unauthenticated users trying to access protected routes
+  if (!isAuthenticated && isProtected) {
     return NextResponse.redirect(new URL('/auth', request.url))
   }
 
