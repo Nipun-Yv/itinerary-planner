@@ -2,7 +2,7 @@
 
 **Effortless, Automated Trip Planning for Modern Travelers**
 
-The AI-Itinerary Planner project addresses the common frustrations of trip planning: the tedious process, inflated prices from travel agents, and the uncertainty of figuring out activities only after reaching your destination. By automating itinerary creation and leveraging AI, this tool ensures travelers can focus on enjoying their journey—not planning it.
+The AI-Itinerary Planner project addresses the common frustrations of trip planning: the tedious process, inflated prices from travel agents, and the uncertainty of figuring out activities only after reaching your destination. By automating itinerary creation and leveraging AI, this tool creates your entire trip end-to-end and generates stay-recommendations around your itinerary.
 
 - **Frontend:** Next.js (with built-in API routes and NextAuth for authentication)
 - **Backend (Compute & Maps):** Spring Boot ([itinerary-planner-spring](https://github.com/Nipun-Yv/itinerary-planner-spring))
