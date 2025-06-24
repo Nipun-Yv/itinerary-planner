@@ -20,7 +20,6 @@ const MapContext = createContext<MapContextType>({
   loadError: undefined,
 });
 
-// Create a custom hook for easy access to the context
 export const useMap = () => useContext(MapContext);
 
 // Create the Provider component

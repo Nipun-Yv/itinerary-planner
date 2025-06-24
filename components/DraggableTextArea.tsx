@@ -1,7 +1,9 @@
 import { LucideArrowUpSquare, MoveIcon } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import { Button } from "./ui/button";
+import axios from "axios";
 
-const DraggableTextarea = () => {
+const DraggableTextarea = ({setActiveTabs}:{setActiveTabs:(categories:string[])=>void}) => {
   const [pos, setPos] = useState({ x: 100, y: 100 });
   const [isDragging, setIsDragging] = useState(false);
   const [text, setText] = useState("");
@@ -39,10 +41,21 @@ const DraggableTextarea = () => {
     };
   }, [isDragging, offset]);
 
+  const submitDescription=async()=>{
+    try{
+      const apiUrl=process.env.NEXT_PUBLIC_API_URL;
+      const {data:{category_list}}=await axios.post(`${apiUrl}/get-recommendations`,{description:text})
+      setActiveTabs(category_list.map((element:{category_type:string})=>(element.category_type.toLowerCase())))
+    }
+    catch(error:any){
+      console.log(error.message)
+      setText("Unable to process your query at the moment")
+    }
+  }
   return (
     <div
       ref={draggableRef}
-      className="absolute w-80 bg-white border-2 border-orange-200 rounded-xl shadow-xl shadow-gray-400 cursor-move select-none"
+      className="absolute w-80 bg-white border-2 border-orange-200 rounded-xl shadow-xl shadow-gray-400 cursor-move select-none border-b-0 z-10"
       style={{
         left: `${pos.x}px`,
         top: `${pos.y}px`,
@@ -63,6 +76,10 @@ const DraggableTextarea = () => {
         onChange={(e) => setText(e.target.value)}
         placeholder="Enter your budget, what categories you wish to explore..."
       />
+      <Button className="w-full p-6 bg-orange-200 text-amber-700 border-amber-700 border-b-1 hover:bg-orange-300 cursor-pointer shadow-md rounded-t-none"
+      onClick={submitDescription}>
+        Submit Trip Details
+      </Button>
     </div>
   );
 };

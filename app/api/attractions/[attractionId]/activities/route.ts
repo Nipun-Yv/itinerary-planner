@@ -24,7 +24,9 @@ export async function GET(
             id: true,
             name: true,
           }
-        }
+        },
+        latitude:true,
+        longitude:true
       },
       orderBy: [
         { category: 'asc' },

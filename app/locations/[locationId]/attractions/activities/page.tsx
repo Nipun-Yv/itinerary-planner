@@ -5,17 +5,21 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
 import DraggableTextarea from "@/components/DraggableTextArea";
+import { Activity, Attraction } from "@prisma/client";
+import ActivityCard from "@/components/ActivityCard";
+import ActivityMap from "@/components/ActivityMap";
 
 export default function ActivitiesPage({ params }: { params: any }) {
-  const {locationId}=React.use(params) as any;
-  const [activities, setActivities] = useState([]);
+  // const { locationId } = React.use(params) as any;
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [attractions, setAttractions] = useState<any>([]);
-  const [selectedActivities, setSelectedActivities] = useState([]);
+  const [selectedActivities, setSelectedActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("all");
+  const [activeTabs, setActiveTabs] = useState<string[]>([]);
   const router = useRouter();
   const searchParams = useSearchParams();
   const attractionIds = searchParams.get("attractions")?.split(",") || [];
+  console.log(activeTabs)
   useEffect(() => {
     if (attractionIds.length > 0) {
       fetchData();
@@ -37,7 +41,10 @@ export default function ActivitiesPage({ params }: { params: any }) {
         attractionIds.map(async (id) => {
           const response = await fetch(`/api/attractions/${id}/activities`);
           const data = await response.json();
-          return data.map((activity) => ({ ...activity, attractionId: id }));
+          return data.map((activity: Activity) => ({
+            ...activity,
+            attractionId: id,
+          }));
         })
       );
 
@@ -50,7 +57,7 @@ export default function ActivitiesPage({ params }: { params: any }) {
     }
   };
 
-  const toggleActivity = (activity) => {
+  const toggleActivity = (activity: Activity) => {
     setSelectedActivities((prev) => {
       const isSelected = prev.find((a) => a.id === activity.id);
       if (isSelected) {
@@ -61,6 +68,21 @@ export default function ActivitiesPage({ params }: { params: any }) {
     });
   };
 
+  const toggleTab = (category: string) => {
+    setActiveTabs((prev) =>
+      prev.includes(category)
+        ? prev.filter((c) => c !== category)
+        : [...prev, category]
+    );
+  };
+  const toggleAll = () => {
+  // if (activeTabs.length === getUniqueCategories().length) {
+    setActiveTabs([]);
+  // } else {
+  //   setActiveTabs(getUniqueCategories());
+  // }
+};
+
   // Calculate total cost
   const getTotalCost = () => {
     return selectedActivities.reduce((total, activity) => {
@@ -69,16 +91,16 @@ export default function ActivitiesPage({ params }: { params: any }) {
   };
 
   // Format currency
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount);
   };
 
-  const getActivityIcon = (category) => {
+  const getActivityIcon = (category: string) => {
     const icons = {
       adventure: "🏔️",
       cultural: "🎭",
@@ -94,7 +116,7 @@ export default function ActivitiesPage({ params }: { params: any }) {
     return icons[category.toLowerCase()] || "🎯";
   };
 
-  const formatDuration = (minutes) => {
+  const formatDuration = (minutes: number) => {
     if (minutes < 60) return `${minutes}m`;
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
@@ -102,9 +124,9 @@ export default function ActivitiesPage({ params }: { params: any }) {
   };
 
   const getFilteredActivities = () => {
-    if (activeTab === "all") return activities;
-    return activities.filter(
-      (activity) => activity.category.toLowerCase() === activeTab
+    if (activeTabs.length === 0) return activities;
+    return activities.filter((activity) =>
+      activeTabs.includes(activity.category.toLowerCase())
     );
   };
 
@@ -136,11 +158,11 @@ export default function ActivitiesPage({ params }: { params: any }) {
       await axios.post(`${springApiBaseUrl}/activities`, {
         selectedActivities: activityIds,
         userId: user.id,
-        locationId:attractions[0]?.location.id
+        locationId: attractions[0]?.location.id,
       });
-      router.push("/itinerary")
+      router.push("/itinerary");
     } catch (err: any) {
-      console.error(err.message)
+      console.error(err.message);
     }
   };
 
@@ -197,7 +219,7 @@ export default function ActivitiesPage({ params }: { params: any }) {
           </div>
         </div>
         <div className="flex flex-1/3 p-2 justify-end">
-        <DraggableTextarea/>
+          <DraggableTextarea setActiveTabs={setActiveTabs}/>
         </div>
       </div>
 
@@ -206,15 +228,16 @@ export default function ActivitiesPage({ params }: { params: any }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex space-x-8 overflow-x-auto">
             <button
-              onClick={() => setActiveTab("all")}
+              onClick={toggleAll}
               className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
-                activeTab === "all"
+                activeTabs.length === getUniqueCategories().length
                   ? "border-orange-500 text-orange-600"
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               }`}
             >
               All Activities ({activities.length})
             </button>
+
             {getUniqueCategories().map((category) => {
               const count = activities.filter(
                 (a) => a.category.toLowerCase() === category
@@ -222,9 +245,9 @@ export default function ActivitiesPage({ params }: { params: any }) {
               return (
                 <button
                   key={category}
-                  onClick={() => setActiveTab(category)}
+                  onClick={() => toggleTab(category)}
                   className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap capitalize ${
-                    activeTab === category
+                    activeTabs.includes(category)
                       ? "border-orange-500 text-orange-600"
                       : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                   }`}
@@ -248,7 +271,6 @@ export default function ActivitiesPage({ params }: { params: any }) {
                   {selectedActivities.length !== 1 ? "ies" : "y"} selected
                 </span>
                 <div className="flex items-center space-x-1 bg-white/20 rounded-lg px-3 py-1">
-                  <span className="text-sm">💰</span>
                   <span className="font-semibold">
                     Total: {formatCurrency(getTotalCost())}
                   </span>
@@ -265,8 +287,7 @@ export default function ActivitiesPage({ params }: { params: any }) {
         </div>
       )}
 
-      {/* Activities Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-0 lg:-px-2 py-8">
         {getFilteredActivities().length === 0 ? (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🎯</div>
@@ -278,81 +299,43 @@ export default function ActivitiesPage({ params }: { params: any }) {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {getFilteredActivities().map((activity) => {
-              const isSelected = selectedActivities.find(
-                (a) => a.id === activity.id
-              );
-              const attraction = attractions.find(
-                (a) => a.id === activity.attractionId
-              );
+          <div className="flex flex-col h-full w-full s md:flex-row max-h-[90vh] min-h-[90vh]">
+            <div className="w-90 flex-shrink-0 border-l border-gray-200 bg-white p-4 rounded-md shadow-2xl">
+              <ActivityMap
+                activities={getFilteredActivities().map((activity) => {
+                  const attraction = attractions.find(
+                    (a: Attraction) => a.id === activity.attractionId
+                  );
+                  return {
+                    ...activity,
+                    attractionImageUrl: attraction.imageUrl,
+                    attractionName: attraction.name,
+                  };
+                })}
+              />
+            </div>
+            <div className="flex-1 overflow-y-auto p-3 flex-wrap ">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 min-w-[200px]">
+                {getFilteredActivities().map((activity) => {
+                  const isSelected = selectedActivities.find(
+                    (a) => a.id === activity.id
+                  );
+                  const attraction = attractions.find(
+                    (a) => a.id === activity.attractionId
+                  );
 
-              return (
-                <div
-                  key={activity.id}
-                  onClick={() => toggleActivity(activity)}
-                  className={`cursor-pointer rounded-xl shadow-sm border-2 transition-all duration-200 hover:shadow-lg hover:-translate-y-1 ${
-                    isSelected
-                      ? "border-orange-500 bg-orange-50 shadow-orange-100"
-                      : "border-gray-200 bg-white hover:border-orange-300"
-                  }`}
-                >
-                  {/* Header */}
-                  <div className="p-5 pb-0">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-lg text-gray-900 leading-tight mb-1">
-                          {activity.name}
-                        </h3>
-                        <p className="text-sm text-orange-600 font-medium">
-                          📍 {attraction?.name}
-                        </p>
-                      </div>
-
-                      {/* Selection Indicator */}
-                      <div
-                        className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ml-3 flex-shrink-0 ${
-                          isSelected
-                            ? "bg-orange-500 border-orange-500"
-                            : "bg-white border-gray-300"
-                        }`}
-                      >
-                        {isSelected && (
-                          <span className="text-white text-sm">✓</span>
-                        )}
-                      </div>
-                    </div>
-
-                    {activity.description && (
-                      <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                        {activity.description}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Footer */}
-                  <div className="p-5 pt-0">
-                    <div className="flex items-center justify-between">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                        {getActivityIcon(activity.category)} {activity.category}
-                      </span>
-
-                      <div className="flex items-center space-x-3 text-sm text-gray-500">
-                        <span>⏱️ {formatDuration(activity.duration)}</span>
-                        {activity.price && (
-                          <span className="font-medium text-green-600">
-                            {formatCurrency(activity.price)}
-                          </span>
-                        )}
-                        {!activity.price && (
-                          <span className="text-gray-400"> Fee</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+                  return (
+                    <ActivityCard
+                      key={activity.id}
+                      toggleActivity={toggleActivity}
+                      attraction={attraction}
+                      isSelected={isSelected ? true : false}
+                      activity={activity}
+                    />
+                  );
+                })}
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -369,7 +352,8 @@ export default function ActivitiesPage({ params }: { params: any }) {
                 </p>
                 <div className="flex items-center space-x-4 text-sm text-gray-500">
                   <span>
-                    Duration: {formatDuration(
+                    Duration:{" "}
+                    {formatDuration(
                       selectedActivities.reduce((sum, a) => sum + a.duration, 0)
                     )}
                   </span>
