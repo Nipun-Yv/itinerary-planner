@@ -98,7 +98,7 @@ const TripCalendar = () => {
           popup={true}
         />
       </div>
-      <button
+      {/* <button
         onClick={startStreaming}
         disabled={
           connectionStatus === "connecting" || connectionStatus === "connected"
@@ -119,7 +119,7 @@ const TripCalendar = () => {
         className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         Stop Stream
-      </button>
+      </button> */}
       <div className="flex items-center gap-2">
         <div
           className={`w-3 h-3 rounded-full transition-colors ${
@@ -194,14 +194,14 @@ const TripCalendar = () => {
               )}
             </div>
 
-            <div className="flex space-x-3">
+            {/* <div className="flex space-x-3">
               <button className="flex-1 bg-gradient-to-r from-orange-400 to-orange-500 text-white py-3 px-4 rounded-lg font-medium hover:from-orange-500 hover:to-orange-600 shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
                 Edit Event
               </button>
               <button className="px-6 py-3 border border-orange-200 text-orange-700 rounded-lg hover:bg-orange-50 font-medium transition-colors">
                 Delete
               </button>
-            </div>
+            </div> */}
           </div>
         </div>
       )}
