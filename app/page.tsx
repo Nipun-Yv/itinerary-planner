@@ -1,5 +1,5 @@
 import Link from "next/link";
-
+import LogoutButton from "@/components/AuthButton";
 export default function HomePage() {
   return (
     <main className="min-h-screen relative overflow-hidden bg-background">
@@ -26,6 +26,9 @@ export default function HomePage() {
             <Link href="/contact" className="text-muted-foreground hover:text-orange-500 transition-colors font-medium">
               Contact
             </Link>
+            <div  className="text-muted-foreground hover:text-orange-500 transition-colors font-medium">
+              <LogoutButton/>
+            </div>
           </div>
           
           {/* Mobile menu button */}
