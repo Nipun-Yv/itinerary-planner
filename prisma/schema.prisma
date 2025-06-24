@@ -1,0 +1,134 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String      @id @default(cuid())
+  email       String      @unique
+  name        String
+  password    String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  itineraries Itinerary[]
+
+  @@map("users")
+}
+
+model Location {
+  id          String       @id @default(cuid())
+  name        String
+  state       String
+  description String?
+  imageUrl    String?
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  attractions Attraction[]
+  hotels      hotels[]
+  itineraries Itinerary[]
+
+  @@map("locations")
+}
+
+model Attraction {
+  id             String          @id @default(cuid())
+  name           String
+  description    String?
+  imageUrl       String?
+  category       String
+  rating         Float?
+  duration       Int?
+  price          Float?
+  isActive       Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  locationId     String
+  activities     Activity[]
+  location       Location        @relation(fields: [locationId], references: [id])
+  itineraryItems ItineraryItem[]
+
+  @@map("attractions")
+}
+
+model Activity {
+  id             String          @id @default(cuid()) @db.VarChar(255)
+  name           String          @db.VarChar(255)
+  description    String?         @db.VarChar(255)
+  duration       Int
+  price          Int?
+  category       String          @db.VarChar(255)
+  latitude       Float?
+  longitude      Float?
+  isActive       Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  attractionId   String          @db.VarChar(255)
+  attraction     Attraction      @relation(fields: [attractionId], references: [id])
+  itineraryItems ItineraryItem[]
+
+  @@map("activities")
+}
+
+model Itinerary {
+  id          String          @id @default(cuid())
+  title       String
+  startDate   DateTime
+  endDate     DateTime
+  totalDays   Int
+  budget      Float?
+  preferences String?
+  status      String          @default("draft")
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  userId      String
+  locationId  String
+  location    Location        @relation(fields: [locationId], references: [id])
+  user        User            @relation(fields: [userId], references: [id])
+  items       ItineraryItem[]
+
+  @@map("itineraries")
+}
+
+model ItineraryItem {
+  id           String      @id @default(cuid())
+  day          Int
+  startTime    DateTime
+  endTime      DateTime
+  title        String
+  description  String?
+  type         String
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  itineraryId  String
+  attractionId String?
+  activityId   String?
+  activity     Activity?   @relation(fields: [activityId], references: [id])
+  attraction   Attraction? @relation(fields: [attractionId], references: [id])
+  itinerary    Itinerary   @relation(fields: [itineraryId], references: [id])
+
+  @@map("itinerary_items")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model hotels {
+  id               Int       @id @default(autoincrement())
+  name             String
+  latitude         Decimal?  @db.Decimal(10, 8)
+  longitude        Decimal?  @db.Decimal(11, 8)
+  star_rating      Int?
+  user_rating      Decimal?  @db.Decimal(2, 1)
+  description      String?
+  room_description String?
+  amenities_list   String?
+  hotel_image_urls String?
+  room_image_url   String?
+  price            Int?
+  locationId       String?
+  address          String?
+  locations        Location? @relation(fields: [locationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}

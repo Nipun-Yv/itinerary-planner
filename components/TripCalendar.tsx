@@ -2,209 +2,102 @@
 import { Calendar, dayjsLocalizer, View } from "react-big-calendar";
 import dayjs from "dayjs";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import React, { useState, useEffect, useRef } from "react";
-import itineraryItemList from "@/data/sample";
+import { useEffect, useRef, useState } from "react";
 import {
-  Calendar as CalendarIcon,
+  CalendarDays,
+  MapPin,
+  Clock,
+  Users,
+  Plus,
+  Filter,
   Loader2,
-
 } from "lucide-react";
-import { Button } from "./ui/button";
+import { CalendarActivity } from "@/types/Activity";
+import useStreaming from "@/hooks/useStreaming";
 
 const localizer = dayjsLocalizer(dayjs);
-const events = [
-  {
-    title: "Meeting",
-    start: new Date(2025, 5, 15, 10, 0),
-    end: new Date(2025, 5, 15, 11, 0),
-    color: "var(--color-orange-500)",
-  },
-  {
-    title: "Lunch",
-    start: new Date(2025, 5, 12, 12, 0),
-    end: new Date(2025, 5, 12, 13, 0),
-    color: "var(--color-orange-200)",
-  },
-];
+
+const eventTypes = {
+  meeting: { icon: Users, label: "Meeting" },
+  meal: { icon: MapPin, label: "Dining" },
+  travel: { icon: MapPin, label: "Travel" },
+  accommodation: { icon: MapPin, label: "Stay" },
+};
 
 const TripCalendar = () => {
-  const [itineraryItems, setItineraryItems] = useState<ItineraryItem[]>(itineraryItemList);
-  const [connectionStatus, setConnectionStatus] =
-    useState<ConnectionStatus>("disconnected");
-  const [error, setError] = useState<string | null>(null);
-  const [isComplete, setIsComplete] = useState<boolean>(false);
-  const eventSourceRef = useRef<EventSource | null>(null);
+  const {
+    isComplete,
+    events,
+    itineraryItems,
+    error,
+    connectionStatus,
+    startStreaming,
+    stopStreaming,
+  } = useStreaming();
 
   const [date, setDate] = useState<Date>(new Date());
   const [view, setView] = useState<View>("week");
-  const [events, setEvents] = useState<Activity[]>([]);
 
-  console.log(itineraryItems)
+  const [selectedEvent, setSelectedEvent] = useState<CalendarActivity | null>(
+    null
+  );
+  const calendarContainerRef = useRef<HTMLDivElement>(null);
 
-  const startStreaming = (): void => {
-    // Reset state
-    setItineraryItems([]);
-    setError(null);
-    setIsComplete(false);
-    setConnectionStatus("connecting");
-
-    // Close existing connection if any
-    if (eventSourceRef.current) {
-      eventSourceRef.current.close();
-    }
-
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
-    // Create new EventSource connection
-    const eventSource = new EventSource(`${apiUrl}/stream-itinerary-sse`);
-    eventSourceRef.current = eventSource;
-
-    eventSource.onopen = (): void => {
-      setConnectionStatus("connected");
-      console.log("SSE connection opened");
-    };
-
-    eventSource.onmessage = (event: MessageEvent): void => {
-      try {
-        const data: SSEMessage = JSON.parse(event.data);
-
-        switch (data.type) {
-          case "connected":
-            console.log("Stream started:", data.message);
-            break;
-
-          case "item":
-            if (data.data) {
-              // Add new itinerary item
-              setItineraryItems((prev) => [...prev, data.data!]);
-              console.log("New itinerary item:", data.data);
-            }
-            break;
-
-          case "complete":
-            console.log("Itinerary generation complete");
-            setIsComplete(true);
-            setConnectionStatus("completed");
-            eventSource.close();
-            break;
-
-          case "error":
-            console.error("Server error:", data.message);
-            setError(data.message || "Unknown server error");
-            setConnectionStatus("error");
-            eventSource.close();
-            break;
-
-          default:
-            console.log("Unknown message type:", data);
+  // Add a useEffect to scroll to the latest event when events change
+  useEffect(() => {
+    if (events.length > 0 && calendarContainerRef.current) {
+      // Example: scroll to the last event (assuming events are sorted by time)
+      const lastEvent = events[events.length - 1];
+      const eventElements =
+        calendarContainerRef.current.querySelectorAll(".rbc-event");
+      let targetElement = null;
+      for (const el of eventElements) {
+        if (el.textContent && el.textContent.includes(lastEvent.title)) {
+          targetElement = el;
+          break;
         }
-      } catch (err) {
-        console.error("Error parsing SSE data:", err);
-        setError("Failed to parse server response");
       }
-    };
-
-    eventSource.onerror = (event: Event): void => {
-      console.error("SSE error:", event);
-      setConnectionStatus("error");
-      setError("Connection error occurred");
-      eventSource.close();
-    };
-  };
-
-  const stopStreaming = (): void => {
-    if (eventSourceRef.current) {
-      eventSourceRef.current.close();
-      eventSourceRef.current = null;
-    }
-    setConnectionStatus("disconnected");
-  };
-
-  // Cleanup on component unmount
-  useEffect(() => {
-    return (): void => {
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
+      if (targetElement) {
+        targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
       }
-    };
-  }, []);
-
-  const formatDate = (timeString: string): Date => {
-    const date = new Date(timeString);
-    return date;
-  };
-
-  const getActivityColor = (
-    activityType: ItineraryItem["activity_type"]
-  ): string => {
-    switch (activityType) {
-      case "adventure":
-        return "var(--color-orange-500)";
-      case "tourist attraction":
-        return "var(--color-orange-200)";
-      case "rest":
-        return "white";
-      case "commute":
-        return "var(--color-orange-100)";
-      default:
-        return "var(--color-orange-100)";
     }
-  };
+  }, [events]);
 
-  const calculateDuration = (startTime: string, endTime: string): number => {
-    return Math.round(
-      (new Date(endTime).getTime() - new Date(startTime).getTime()) /
-        (1000 * 60)
-    );
-  };
-
-  useEffect(() => {
-    const updateEventList = (itineraryItems: ItineraryItem[]) => {
-      setEvents(
-        itineraryItems.map((item) => {
-          return {
-            title: item.activity_name,
-            start: formatDate(item.start_time),
-            end: formatDate(item.end_time),
-            color: getActivityColor(item.activity_type),
-            activity_type:item.activity_type
-          };
-        })
-      );
-    };
-    if (itineraryItems) {
-      updateEventList(itineraryItems);
-    }
-  }, [itineraryItems]);
+  const customEventPropGetter = (event: CalendarActivity) => ({
+    style: {
+      backgroundColor: event.color,
+      color: `${event.color == "white" ? "orange" : "white"}`,
+      border: "none",
+      borderRadius: "5px",
+      fontSize: "13px",
+      fontWeight: "500",
+      cursor: "pointer",
+      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+      transition: "all 0.2s ease-in-out",
+      borderBottom: "1px solid white",
+    },
+  });
   return (
-    <div className="h-full bg-white shadow-xl rounded-xl p-1 flex-3/4">
-      <Calendar
-        localizer={localizer}
-        events={events}
-        startAccessor="start"
-        endAccessor="end"
-        onNavigate={(newDate) => setDate(newDate)}
-        onView={(newView) => setView(newView)}
-        view={view}
-        date={date}
-        step={10} // 15-minute steps
-timeslots={2} 
-        style={{ height: "95%", width: "100%" }}
-        eventPropGetter={(event) => ({
-          style: {
-            background: event.color,
-            color: `${event.activity_type=='rest'?"orange":"white"}`,
-            border: `${event.activity_type=='rest'?"0.5px solid orange":"none"}`,
-            borderRadius: "0.375rem",
-            boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)",
-            display:"flex",
-            alignItems:"center",
-            justifyContent:"center",
-            gap:"5%",
-            boxShadow:"0px 20px 20px rgb(170,170,170)",
-          },
-        })}
-      />
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white flex-3/4">
+      <div className="bg-white rounded-xl shadow-lg border border-orange-100 overflow-hidden backdrop-blur-sm"
+        ref={calendarContainerRef}>
+        <Calendar
+          localizer={localizer}
+          events={events}
+          startAccessor="start"
+          endAccessor="end"
+          onNavigate={(newDate) => setDate(newDate)}
+          onView={(newView) => setView(newView)}
+          onSelectEvent={setSelectedEvent}
+          step={10}
+          timeslots={1}
+          view={view}
+          date={date}
+          style={{ height: "700px" }}
+          eventPropGetter={customEventPropGetter}
+          popup={true}
+        />
+      </div>
       <button
         onClick={startStreaming}
         disabled={
@@ -227,8 +120,6 @@ timeslots={2}
       >
         Stop Stream
       </button>
-
-      {/* Connection Status */}
       <div className="flex items-center gap-2">
         <div
           className={`w-3 h-3 rounded-full transition-colors ${
@@ -247,6 +138,73 @@ timeslots={2}
           {connectionStatus}
         </span>
       </div>
+      {/* Modal */}
+      {selectedEvent && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
+          onClick={() => setSelectedEvent(null)}
+        >
+          <div
+            className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl border border-orange-100 transform transition-all"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center space-x-3">
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg"
+                  style={{ backgroundColor: selectedEvent.color }}
+                >
+                  {(() => {
+                    const EventIcon =
+                      eventTypes[selectedEvent.type]?.icon || CalendarDays;
+                    return <EventIcon className="w-6 h-6 text-white" />;
+                  })()}
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {selectedEvent.title}
+                  </h3>
+                  <p className="text-sm text-orange-600 font-medium">
+                    {eventTypes[selectedEvent.type]?.label}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedEvent(null)}
+                className="text-gray-400 hover:text-gray-600 text-2xl font-light w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="space-y-3 mb-6">
+              <div className="flex items-center space-x-3 text-sm text-gray-600 p-3 bg-orange-50 rounded-lg">
+                <Clock className="w-4 h-4 text-orange-500" />
+                <span className="font-medium">
+                  {dayjs(selectedEvent.start).format("MMM DD, YYYY HH:mm")} -
+                  {dayjs(selectedEvent.end).format("HH:mm")}
+                </span>
+              </div>
+
+              {selectedEvent.location && (
+                <div className="flex items-center space-x-3 text-sm text-gray-600 p-3 bg-orange-50 rounded-lg">
+                  <MapPin className="w-4 h-4 text-orange-500" />
+                  <span className="font-medium">{selectedEvent.location}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="flex space-x-3">
+              <button className="flex-1 bg-gradient-to-r from-orange-400 to-orange-500 text-white py-3 px-4 rounded-lg font-medium hover:from-orange-500 hover:to-orange-600 shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
+                Edit Event
+              </button>
+              <button className="px-6 py-3 border border-orange-200 text-orange-700 rounded-lg hover:bg-orange-50 font-medium transition-colors">
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
