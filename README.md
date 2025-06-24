@@ -12,7 +12,7 @@ The AI-Itinerary Planner project addresses the common frustrations of trip plann
 
 ## Project Overview
 
-AI-Itinerary Planner streamlines the entire trip planning workflow:
+AI-Itinerary Planner streamlines the entire trip planning workflow, here is the entire step by step navigation:
 
 1. **Location Selection**
    - Choose from pre-configured destinations (currently Delhi and Goa).
