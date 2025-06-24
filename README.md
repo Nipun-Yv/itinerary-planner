@@ -15,20 +15,21 @@ The AI-Itinerary Planner project addresses the common frustrations of trip plann
 AI-Itinerary Planner streamlines the entire trip planning workflow, here is the entire step by step navigation:
 
 1. **Location Selection**
-   - Choose from pre-configured destinations (currently Delhi and Goa).
-   - Database and attraction data are available for these locations.
+   - Choose from pre-configured destinations.
+   - Attraction,activity and hotel data are available Delhi and Goa currently.
 
 2. **Attraction Selection**
-   - Browse and select attractions you wish to visit.
+   - Browse and select attractions you wish to visit. (It is recommended that you select multiple attractions (4 minimum) for a multiple day itinerary)
 
 3. **Activity Customization**
    - View an activity screen tailored to your chosen attractions.
    - Select activities based on your interests.
    - Use the text drawer to describe your trip—its semantic meaning is analyzed to auto-select relevant tags and activities.
    - *Currently supports filtering by `activity_type`; additional filters are planned for future updates.*
+   - It is recommended that you select a least 10-12 activities for extended itinerary calendar generation
 
 4. **AI-Powered Itinerary Generation**
-   - Click "Generate AI Itinerary" to automate the rest of your planning.
+   - Click "Generate AI Itinerary" to automate the rest of your planning, **you no longer need your keyboard or your keypad**.
    - **Automated Route Planning:** Uses routing APIs to optimize your travel path.
    - **Dynamic Calendar Generation:** Calendar updates in real time using server-sent events (SSE).
    - **Smart Hotel Recommendations:** Hotels are rendered on a map along the planned route (within a 15km radius), so you plan your trip around what you do rather than where you stay.
@@ -39,16 +40,10 @@ AI-Itinerary Planner streamlines the entire trip planning workflow, here is the 
 
 ## Key Features
 
-- **Customizable Map Markers:** Map markers are enhanced with images and text for better visual presentation[1].
-- **Efficient Activity Management:** Scrollable UI components and map views for seamless tab and activity management[2].
+- **Customized Maps interfacing with LLMS:** Maps enhanced with route planning,with API routes interfacing seamlessly with the configured LLMs[1].
+- **Efficient Activity Management:** Scrollable and Dynamic UI components and map views for seamless tab and activity management[2].
 - **SVG-Based UI Elements:** Uses SVG for custom shapes, responsive design, and text formatting[3].
-- **Modern React Hooks:** Leverages React hooks like `useEffect` and `useCallback` for optimized component lifecycle and performance[4].
 
-## Getting Started
-
-To get started with the project, clone the repositories and follow the setup instructions in each backend and frontend project.
-
----
 
 **AI-Itinerary Planner: Where your journey begins with a single click.**
 
